@@ -21,9 +21,11 @@ const FALLBACK_RADIUS_MI = 0.06;   // ~100 yards; tight enough to hit one parcel
 export default {
   async fetch(request, env, ctx) {
     const origin = request.headers.get("Origin") || "";
-    const allowed = env.ALLOWED_ORIGIN || "*";
+    const allowList = (env.ALLOWED_ORIGIN || "*").split(",").map((s) => s.trim()).filter(Boolean);
+    const open = allowList.includes("*");
+    const allowed = open ? "*" : (allowList.includes(origin) ? origin : allowList[0]);
     const cors = {
-      "Access-Control-Allow-Origin": allowed === "*" ? "*" : allowed,
+      "Access-Control-Allow-Origin": allowed,
       "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
       Vary: "Origin",
@@ -31,7 +33,9 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { headers: cors });
     if (request.method !== "GET") return json({ error: "GET only" }, 405, cors);
-    if (allowed !== "*" && origin && origin !== allowed)
+    // Browsers always send Origin on this cross-site call; scripts and curl usually don't.
+    // Spoofable by a determined caller, which is why the rate limits below also exist.
+    if (!open && !allowList.includes(origin))
       return json({ error: "origin not allowed" }, 403, cors);
 
     const url = new URL(request.url);
@@ -54,6 +58,12 @@ export default {
     const cache = caches.default;
     const hit = await cache.match(cacheKey);
     if (hit) return json({ ...(await hit.json()), cached: true }, 200, cors);
+
+    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    if (env.PER_IP && !(await env.PER_IP.limit({ key: ip })).success)
+      return json({ error: "slow down — too many lookups" }, 429, cors);
+    if (env.ALL_USERS && !(await env.ALL_USERS.limit({ key: "all" })).success)
+      return json({ error: "lookups are busy — try again in a minute" }, 429, cors);
 
     const headers = { "X-Api-Key": env.RENTCAST_KEY, Accept: "application/json" };
     let rec = null;

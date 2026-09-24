@@ -3,4 +3,21 @@ main = "src/index.js"
 compatibility_date = "2026-09-01"
 
 [vars]
-ALLOWED_ORIGIN = "https://easyflipestimator.com"
+# comma-separated; both the bare domain and www
+ALLOWED_ORIGIN = "https://easyflipestimator.com,https://www.easyflipestimator.com"
+
+# per visitor: 8 real property lookups a minute is plenty for a person picking addresses
+[[ratelimits]]
+name = "PER_IP"
+namespace_id = "1101"
+[ratelimits.simple]
+limit = 8
+period = 60
+
+# everyone combined, per Cloudflare location: a ceiling on how fast the quota can drain
+[[ratelimits]]
+name = "ALL_USERS"
+namespace_id = "1102"
+[ratelimits.simple]
+limit = 20
+period = 60
