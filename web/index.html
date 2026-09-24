@@ -217,6 +217,11 @@ input[type=number],select{
   font-variant-numeric:tabular-nums;
 }
 input[type=number]{width:88px;text-align:right}
+input.money-in{width:118px}
+input.mine{border-color:var(--amber);color:var(--amber);font-weight:700}
+#maoSub{cursor:pointer}
+#dwAmt{cursor:pointer;border-bottom:1px dashed var(--ink-3)}
+#dwAmt.mine{color:var(--amber);border-bottom-color:var(--amber);font-weight:700}
 select{flex:1;min-width:0;max-width:210px}
 input:focus,select:focus{outline:2px solid var(--amber);outline-offset:1px}
 input[type=range]{flex:1;min-width:0;accent-color:var(--amber);height:34px}
@@ -359,6 +364,8 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--amber);height:34px}
         <input type="number" id="beds" value="3" min="0" max="10"></div>
       <div class="row"><label for="baths">Bathrooms</label>
         <input type="number" id="baths" value="2" min="1" max="8"></div>
+      <div class="row"><label for="arvIn">Sells for after repairs</label>
+        <input type="number" id="arvIn" class="money-in" min="0" step="1000" inputmode="numeric"></div>
       <div class="note" id="houseNote"></div>
     </div>
   </details>
@@ -424,6 +431,8 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--amber);height:34px}
           <option value="130">Biweekly mow — $130/mo</option>
           <option value="260">Weekly mow — $260/mo</option>
         </select></div>
+      <div class="row"><label for="taxIn">Property tax, % a year</label>
+        <input type="number" id="taxIn" min="0" max="6" step="0.01" inputmode="decimal"></div>
       <div class="note" id="holdNote"></div>
     </div>
   </details>
@@ -449,6 +458,12 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--amber);height:34px}
         <input type="range" id="cont" min="12" max="25" step="1" value="20"></div>
       <div class="row"><label for="marg">Profit target <span class="n" id="margN">20%</span></label>
         <input type="range" id="marg" min="8" max="35" step="1" value="20"></div>
+      <div class="row"><label for="sellPct">Selling costs <span class="n" id="sellN">7%</span></label>
+        <input type="range" id="sellPct" min="0" max="10" step="0.5" value="7"></div>
+      <div class="row"><label for="buyPct">Closing costs to buy <span class="n" id="buyN">2%</span></label>
+        <input type="range" id="buyPct" min="0" max="5" step="0.5" value="2"></div>
+      <div class="row" id="ltcRow"><label for="ltc">Loan covers <span class="n" id="ltcN">85%</span></label>
+        <input type="range" id="ltc" min="50" max="100" step="5" value="85"></div>
       <div class="note" id="marginNote"></div>
     </div>
   </details>
@@ -477,7 +492,6 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--amber);height:34px}
   <div class="foot" id="foot"></div>
 </div>
 
-<script src="/config.js"></script>
 <script>
 let DATA=null;
 
@@ -666,7 +680,12 @@ function calc(){
     basis=z.psf; s2l=1-0.22*z.reduced; valSrc="estimate";
     band={high:.08,medium:.12,low:.18}[z.conf];
   }
-  const mid=basis*adj*sqft*s2l, arvLo=mid*(1-band), arvHi=mid*(1+band), arv=(arvLo+arvHi)/2;
+  const mid=basis*adj*sqft*s2l, arvLo=mid*(1-band), arvHi=mid*(1+band), estArv=(arvLo+arvHi)/2;
+  const arvOv=parseFloat($("arvIn").value);
+  const arvMine=Number.isFinite(arvOv)&&arvOv>0;
+  const arv=arvMine?arvOv:estArv;
+  $("arvIn").placeholder=Math.round(estArv/1000)*1000;
+  $("arvIn").className="money-in"+(arvMine?" mine":"");
 
   // rehab
   let hard=0, matTot=0, labTot=0, parts={};
@@ -706,6 +725,7 @@ function calc(){
   $("dwAmt").textContent = trades["Full drywall replace"] ? "in full replace"
     : (dwCost?money(dwCost):"—");
   $("dwAmt").className = "n"+(overrides["Drywall repair & texture"]!=null?" mine":"");
+  $("dwAmt").title="Tap to enter your own drywall price";
   $("dwLbl").textContent = trades["Full drywall replace"]
     ? "Hanging new board already covers this."
     : dwi===0 ? "No drywall work."
@@ -721,7 +741,12 @@ function calc(){
   const months=holdDays/30.4;
 
   const ins=+$("ins").value, util=+$("util").value, yard=+$("yard").value;
-  const taxRate = tractAdj ? tractAdj.rate : z.tax;
+  const estTax = tractAdj ? tractAdj.rate : z.tax;
+  const taxOv=parseFloat($("taxIn").value);
+  const taxMine=Number.isFinite(taxOv)&&taxOv>=0&&$("taxIn").value!=="";
+  const taxRate = taxMine ? taxOv/100 : estTax;
+  $("taxIn").placeholder=(estTax*100).toFixed(2);
+  $("taxIn").className=taxMine?"mine":"";
   const taxBase = assessed || arv;
   const taxes=taxBase*taxRate/12*months;
   const holding=(ins+util+yard)*months+taxes;
@@ -729,14 +754,15 @@ function calc(){
   // gauge: scope vs ARV. Contingency and selling excluded by design.
   const gaugeCost=hard+gc+holding, gaugePct=gaugeCost/arv;
 
-  const margPct=+$("marg").value/100, margin=arv*margPct, selling=arv*0.07;
+  const sellP=+$("sellPct").value/100, buyP=+$("buyPct").value/100, ltc=+$("ltc").value/100;
+  const margPct=+$("marg").value/100, margin=arv*margPct, selling=arv*sellP;
   const fv=$("fin").value, cash=fv==="cash";
   let rate=0,pts=0; if(!cash){const p=fv.split(",");rate=+p[0]/100;pts=+p[1]/100;}
 
   let offer=arv*0.5, fin=0;
   for(let i=0;i<60;i++){
-    if(!cash){const loan=(offer+rehab)*0.85; fin=loan*pts+loan*rate/12*months;}
-    const n=arv-rehab-holding-fin-selling-offer*0.02-margin;
+    if(!cash){const loan=(offer+rehab)*ltc; fin=loan*pts+loan*rate/12*months;}
+    const n=arv-rehab-holding-fin-selling-offer*buyP-margin;
     if(Math.abs(n-offer)<1){offer=n;break;} offer=n;}
 
   // paint the screen
@@ -745,7 +771,9 @@ function calc(){
   el.className="big"+(bad?" bad":"");
   $("maoSub").innerHTML= bad
     ? `Costs exceed what this house can sell for. Cut scope or walk.`
-    : `Sells for <em>${money(arvLo)}–${money(arvHi)}</em> after repairs · you keep <em>${money(margin)}</em>`;
+    : arvMine
+      ? `Sells for <em>${money(arv)}</em> (your number) · you keep <em>${money(margin)}</em>`
+      : `Sells for <em>${money(arvLo)}–${money(arvHi)}</em> after repairs · you keep <em>${money(margin)}</em>`;
 
   const pct=Math.min(gaugePct/0.55,1)*100;
   $("gfill").style.width=pct+"%";
@@ -781,8 +809,14 @@ function calc(){
   $("sumLedger").textContent=money(arv);
   $("contN").textContent=$("cont").value+"%";
   $("margN").textContent=$("marg").value+"%";
+  $("sellN").textContent=$("sellPct").value+"%";
+  $("buyN").textContent=$("buyPct").value+"%";
+  $("ltcN").textContent=$("ltc").value+"% of price + rehab";
+  $("ltcRow").style.display=cash?"none":"";
 
-  $("houseNote").textContent=`Typical house in this ZIP is ${z.medSqft.toLocaleString()} sqft.`;
+  $("houseNote").textContent = arvMine
+    ? `Using your resale number. The data says ${money(arvLo)}–${money(arvHi)} for this house. Clear the box to go back to it.`
+    : `Typical house in this ZIP is ${z.medSqft.toLocaleString()} sqft. Type a resale price if you have comps.`;
   $("holdNote").textContent= hv==="auto"
     ? `Houses here go under contract in about ${z.dom} days. Add your rehab time and closing and you're at ${holdDays} days. Drag it longer to see what a slow sale costs.`
     : `Property tax runs ${(z.tax*100).toFixed(2)}% a year here — ${money(taxes)} over ${holdDays} days.`;
@@ -807,13 +841,13 @@ function calc(){
       ? `Resale is based on $${z.psf}/sqft asking prices, adjusted to the ${(z.s2lReal*100).toFixed(1)}% of asking that homes here actually sell for (Redfin).`
       : `Resale is based on $${z.psf}/sqft asking prices. No recent sales data here, so the discount to asking is estimated — treat the range as rough.`;
 
-  window.__last={offer,bad,arvLo,arvHi,hard,gc,cont,holding,fin,selling,margin,
+  window.__last={offer,bad,arvLo,arvHi,arv,arvMine,hard,gc,cont,holding,fin,selling,margin,
     holdDays,gaugePct,matTot,labTot,rehab};
 
-  const L=[["Sells for",arv],["Buy it for",-offer],["Closing on the buy",-offer*0.02],
+  const L=[["Sells for",arv],["Buy it for",-offer],["Closing on the buy",-offer*buyP],
     ["Materials",-matTot],["Labor",-labTot],["Running the job",-gc],["Contingency",-cont],
     ["Carrying costs",-holding],["Loan costs",-fin],["Selling costs",-selling],
-    ["You keep",arv-offer-offer*0.02-rehab-holding-fin-selling]];
+    ["You keep",arv-offer-offer*buyP-rehab-holding-fin-selling]];
   $("ledger").innerHTML=L.map(([k,v])=>
     `<div class="${v<0?'neg':''}"><span>${k}</span><span>${money(v)}</span></div>`).join("");
 
@@ -830,9 +864,9 @@ function calc(){
 
 let TRACTS=null, tractAdj=null, assessed=null, suggests=[], suggIdx=-1, suggTimer=null, suggSeq=0;
 
-/* Keys live in config.js so rebuilds of this file never clobber them. */
-const MAPBOX_TOKEN=(window.CONFIG&&window.CONFIG.MAPBOX_TOKEN)||"";
-const PROPERTY_API=(window.CONFIG&&window.CONFIG.PROPERTY_API)||"";
+/* Address search and property records go through our own API. No keys live in
+   the page; they stay inside the API. */
+const API="https://api.easyflipestimator.com";
 
 function loadTracts(){
   if(TRACTS) return Promise.resolve(TRACTS);
@@ -848,37 +882,25 @@ function loadTracts(){
 
 function fetchSuggestions(q,seq){
   const z=zipInfo($("zip").value);
-  const near = z && z.lat!=null ? {lat:z.lat,lon:z.lon} : null;
-  let url;
-  if(MAPBOX_TOKEN){
-    url="https://api.mapbox.com/search/geocode/v6/forward?q="+encodeURIComponent(q)+
-        "&country=us&types=address&limit=6&access_token="+MAPBOX_TOKEN+
-        (near?"&proximity="+near.lon+","+near.lat:"");
-  }else{
-    url="https://photon.komoot.io/api/?q="+encodeURIComponent(q)+"&limit=6&lang=en"+
-        (near?"&lat="+near.lat+"&lon="+near.lon:"");
-  }
-  return fetch(url).then(r=>r.json()).then(j=>{
-    if(seq!==suggSeq) return null;
-    const out=[];
-    for(const f of (j.features||[])){
-      const p=f.properties||{}, c=(f.geometry||{}).coordinates||[];
-      if(MAPBOX_TOKEN){
-        const ctx=p.context||{};
-        out.push({line:p.name||p.full_address||"",
-          sub:[ctx.place&&ctx.place.name, ctx.region&&ctx.region.region_code,
-               ctx.postcode&&ctx.postcode.name].filter(Boolean).join(", "),
-          lon:c[0], lat:c[1], zip:ctx.postcode?ctx.postcode.name:null});
-      }else{
+  const near = z && z.lat!=null ? "&lat="+z.lat+"&lon="+z.lon : "";
+  const photon=()=>fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(q)+"&limit=6&lang=en"+near)
+    .then(r=>r.json()).then(j=>{
+      const out=[];
+      for(const f of (j.features||[])){
+        const p=f.properties||{}, c=(f.geometry||{}).coordinates||[];
         if(p.countrycode && p.countrycode!=="US") continue;
         const line=[p.housenumber,p.street||p.name].filter(Boolean).join(" ");
         if(!line) continue;
         out.push({line, sub:[p.city,p.state,p.postcode].filter(Boolean).join(", "),
           lon:c[0], lat:c[1], zip:p.postcode||null});
       }
-    }
-    return out;
-  });
+      return out;
+    });
+  return fetch(API+"/suggest?q="+encodeURIComponent(q)+near)
+    .then(r=>r.ok?r.json():Promise.reject())
+    .then(j=>(j.results&&j.results.length)?j.results:photon())
+    .catch(photon)
+    .then(out=>seq!==suggSeq?null:out);
 }
 
 function renderSuggestions(list,msg){
@@ -920,10 +942,9 @@ function choose(i){
 
 let propNote="";
 function fillFromProperty(fullAddress,lat,lon){
-  if(!PROPERTY_API) return;
   const base=$("addrNote").textContent;
   $("addrNote").textContent=(base?base+" ":"")+"Looking up the property…";
-  const q=PROPERTY_API+"?address="+encodeURIComponent(fullAddress)+
+  const q=API+"/property?address="+encodeURIComponent(fullAddress)+
     (Number.isFinite(lat)?"&lat="+lat+"&lon="+lon:"");
   fetch(q)
     .then(r=>r.ok?r.json():Promise.reject())
@@ -1030,6 +1051,7 @@ function encodeState(){
     a:$("baths").value,s:scope,t:on,q:q,d:$("dw").value,h:$("hold").value,
     i:$("ins").value,u:$("util").value,y:$("yard").value,n:$("fin").value,
     g:$("gc").value,c:$("cont").value,m:$("marg").value,k:$("mq").value,
+    v:$("arvIn").value,tx:$("taxIn").value,sp:$("sellPct").value,bp:$("buyPct").value,lt:$("ltc").value,
     o:JSON.stringify(Object.fromEntries(Object.entries(overrides).map(([k,v])=>
       [TRADE_ORDER.indexOf(k),Math.round(v)]))),
     om:JSON.stringify(Object.fromEntries(Object.entries(ovM).map(([k,v])=>
@@ -1046,7 +1068,8 @@ function applyState(){
     if(!p.get("z")||!zipInfo(p.get("z"))) return false;
     $("zip").value=p.get("z");
     [["f","sqft"],["b","beds"],["a","baths"],["d","dw"],["h","hold"],["i","ins"],
-     ["u","util"],["y","yard"],["n","fin"],["g","gc"],["c","cont"],["m","marg"],["k","mq"]]
+     ["u","util"],["y","yard"],["n","fin"],["g","gc"],["c","cont"],["m","marg"],["k","mq"],
+     ["v","arvIn"],["tx","taxIn"],["sp","sellPct"],["bp","buyPct"],["lt","ltc"]]
       .forEach(([k,id])=>{ if(p.get(k)!==null) $(id).value=p.get(k); });
     scope=p.get("s")||"standard";
     document.querySelectorAll("#scopeSeg button").forEach(b=>
@@ -1074,7 +1097,8 @@ function dealText(){
   L.push(`${$("sqft").value} sqft in ${z.city}, ${z.state} ${z.zip}`);
   L.push("");
   L.push(r.bad?"No offer works on this one.":`Don't pay more than ${money(r.offer)}`);
-  L.push(`Resale after repairs   ${money(r.arvLo)} - ${money(r.arvHi)}`);
+  L.push(r.arvMine ? `Resale after repairs   ${money(r.arv)} (my number)`
+                   : `Resale after repairs   ${money(r.arvLo)} - ${money(r.arvHi)}`);
   L.push(`Repair budget          ${money(r.rehab)}`);
   L.push(`  Materials            ${money(r.matTot)}`);
   L.push(`  Labor                ${money(r.labTot)}`);
@@ -1088,6 +1112,22 @@ function dealText(){
   if(r.gaugePct>0.40) L.push(`Heads up: job + carry is ${(r.gaugePct*100).toFixed(0)}% of resale, past the 40% mark.`);
   return L.join("\n");
 }
+
+$("maoSub").addEventListener("click",()=>{
+  const d=document.querySelector("details:nth-of-type(1)"); d.open=true;
+  $("arvIn").focus(); $("arvIn").scrollIntoView({block:"center"});
+});
+$("dwAmt").addEventListener("click",e=>{
+  e.preventDefault(); e.stopPropagation();
+  const k="Drywall repair & texture", has=overrides[k]!=null;
+  const v=window.prompt("Drywall repair — your price for the whole job."+
+    (has?`\nNow $${Math.round(overrides[k]).toLocaleString()}.`:"")+
+    "\nLeave blank to use the estimate.", has?Math.round(overrides[k]):"");
+  if(v===null) return;
+  const n=parseFloat(String(v).replace(/[^0-9.]/g,""));
+  if(!v.trim()||!Number.isFinite(n)||n<0) delete overrides[k]; else overrides[k]=n;
+  calc();
+});
 
 $("mq").addEventListener("input",e=>{
   const tier=TIER_NAMES[+e.target.value];
@@ -1131,9 +1171,10 @@ $("locBtn").addEventListener("click",()=>{
 $("zip").addEventListener("input",e=>{
   e.target.value=e.target.value.replace(/\D/g,"").slice(0,5);
   if(e.target.value.length===5){const z=zipInfo(e.target.value);
-    if(z){quality={};renderTrades();}}
+    if(z){quality={};$("arvIn").value="";renderTrades();}}
   calc();});
-["sqft","beds","baths","hold","ins","util","yard","fin","gc","cont","marg","dw"]
+["sqft","beds","baths","hold","ins","util","yard","fin","gc","cont","marg","dw",
+ "arvIn","taxIn","sellPct","buyPct","ltc"]
   .forEach(id=>$(id).addEventListener("input",calc));
 document.querySelectorAll("#scopeSeg button").forEach(b=>b.onclick=()=>setScope(b.dataset.s));
 

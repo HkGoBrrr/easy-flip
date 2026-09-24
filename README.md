@@ -51,7 +51,6 @@ Run it locally:
 
 ```bash
 cd web
-cp config.example.js config.js     # then add your keys
 python3 -m http.server 8000
 ```
 
@@ -63,9 +62,9 @@ Cloudflare Pages, Netlify, GitHub Pages all work. No build step.
 
 ### worker/
 
-Holds the RentCast API key server-side and caches each address for 30 days.
-Optional — leave `PROPERTY_API` empty in `config.js` and the app skips property
-autofill. Everything else still works.
+The app's API, at `api.easyflipestimator.com`: address autocomplete (Mapbox) and
+property records (RentCast). Both keys stay server-side. Caches results, checks
+the caller's origin, and rate-limits per visitor.
 
 ```bash
 cd worker
@@ -89,16 +88,21 @@ python3 underwrite.py
 
 ## Configuration
 
-`web/config.js` is gitignored and holds two optional keys:
+There's nothing to configure in the page. Address search and property records go
+through the API in `worker/`, served at `api.easyflipestimator.com`, and both keys
+live there as Worker secrets:
 
-| Key | What it does | Without it |
-|---|---|---|
-| `MAPBOX_TOKEN` | Address autocomplete | Falls back to Photon (free, no key, patchier house numbers) |
-| `PROPERTY_API` | Autofills sqft/beds/baths from assessor records | You type them in |
+```bash
+cd worker
+npx wrangler secret put RENTCAST_KEY
+npx wrangler secret put MAPBOX_TOKEN
+npx wrangler deploy
+```
 
-A Mapbox public token is safe in client code, but restrict it to your domain in
-the Mapbox dashboard. The RentCast key is **not** safe in client code — that's
-what the Worker is for.
+The Worker only answers requests from the site's own origin, rate-limits each
+visitor, and caches results. If it's unreachable, address search falls back to
+Photon (free, no key) and you type the house details yourself — everything else
+works offline.
 
 ---
 

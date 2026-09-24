@@ -1,5 +1,11 @@
 /**
- * EasyFlipEstimator — property lookup proxy (v2).
+ * EasyFlipEstimator API — served at api.easyflipestimator.com.
+ *
+ *   /suggest   address autocomplete (Mapbox, called server-side)
+ *   /property  property records (RentCast)
+ *
+ * Both keys are Worker secrets. Nothing identifying — no key, no account
+ * subdomain — ever reaches the browser.
  *
  * Why two strategies: RentCast's address search is an exact-ish string match and
  * fails on small formatting differences. Coordinates can't be misformatted, so
@@ -12,6 +18,7 @@
  * Setup:
  *   npx wrangler login
  *   npx wrangler secret put RENTCAST_KEY
+ *   npx wrangler secret put MAPBOX_TOKEN
  *   npx wrangler deploy
  */
 
@@ -39,6 +46,9 @@ export default {
       return json({ error: "origin not allowed" }, 403, cors);
 
     const url = new URL(request.url);
+    if (url.pathname === "/suggest") return suggest(url, request, env, ctx, cors);
+    // everything else is a property lookup ("/property", and "/" for older app builds)
+
     const raw = (url.searchParams.get("address") || "").trim();
     const lat = parseFloat(url.searchParams.get("lat"));
     const lon = parseFloat(url.searchParams.get("lon"));
@@ -137,6 +147,50 @@ function normalize(s) {
   t = t.replace(/,\s*([A-Za-z]{2}),\s*(\d{5})(-\d{4})?$/, ", $1 $2");
   t = t.replace(/(\d{5})-\d{4}$/, "$1");
   return t;
+}
+
+async function suggest(url, request, env, ctx, cors) {
+  const q = (url.searchParams.get("q") || "").trim().slice(0, 120);
+  if (q.length < 3) return json({ results: [] }, 200, cors);
+  if (!env.MAPBOX_TOKEN) return json({ error: "not configured" }, 501, cors);
+  const lat = parseFloat(url.searchParams.get("lat"));
+  const lon = parseFloat(url.searchParams.get("lon"));
+  const near = Number.isFinite(lat) && Number.isFinite(lon);
+
+  const key = new Request("https://cache.local/s1?q=" + encodeURIComponent(q.toLowerCase()) +
+    (near ? "&n=" + lat.toFixed(1) + "," + lon.toFixed(1) : ""), { method: "GET" });
+  const hit = await caches.default.match(key);
+  if (hit) return json(await hit.json(), 200, cors);
+
+  const ip = request.headers.get("cf-connecting-ip") || "unknown";
+  if (env.SUGGEST_IP && !(await env.SUGGEST_IP.limit({ key: ip })).success)
+    return json({ error: "slow down" }, 429, cors);
+
+  const mb = "https://api.mapbox.com/search/geocode/v6/forward?q=" + encodeURIComponent(q) +
+    "&country=us&types=address&limit=6&access_token=" + env.MAPBOX_TOKEN +
+    (near ? "&proximity=" + lon + "," + lat : "");
+  let j;
+  try {
+    // present the site's address so a domain-restricted Mapbox token is accepted
+    const r = await fetch(mb, { headers: { Referer: "https://easyflipestimator.com/" } });
+    if (!r.ok) return json({ error: "upstream " + r.status }, 502, cors);
+    j = await r.json();
+  } catch (e) {
+    return json({ error: "upstream unreachable" }, 502, cors);
+  }
+  const results = (j.features || []).map((f) => {
+    const p = f.properties || {}, c = (f.geometry || {}).coordinates || [], cx = p.context || {};
+    return {
+      line: p.name || p.full_address || "",
+      sub: [cx.place && cx.place.name, cx.region && cx.region.region_code,
+            cx.postcode && cx.postcode.name].filter(Boolean).join(", "),
+      lon: c[0], lat: c[1], zip: cx.postcode ? cx.postcode.name : null,
+    };
+  }).filter((r) => r.line);
+
+  const res = json({ results }, 200, { ...cors, "Cache-Control": "public, max-age=86400" });
+  ctx.waitUntil(caches.default.put(key, res.clone()));
+  return res;
 }
 
 function houseNumber(addr) {

@@ -2,13 +2,13 @@
  * Page: network-first, so a redeploy shows up on the next launch.
  * Data and assets: cache-first, so the app works with no signal once loaded.
  */
-const CACHE = "offer-v16";
-const ASSETS = ["/", "/index.html", "/data.json", "/tracts.txt", "/config.js",
+const CACHE = "offer-v18";
+const ASSETS = ["/", "/index.html", "/data.json", "/tracts.txt",
   "/manifest.webmanifest", "/favicon.ico", "/og.png",
   "/icons/icon-192.png", "/icons/icon-512.png", "/icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
-  // one missing optional file (like config.js) must not stop the rest from caching
+  // one missing optional file (like tracts.txt) must not stop the rest from caching
   e.waitUntil(caches.open(CACHE).then((c) =>
     Promise.all(ASSETS.map((u) => c.add(u).catch(() => null))))
     .then(() => self.skipWaiting()));
