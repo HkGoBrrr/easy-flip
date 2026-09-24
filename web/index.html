@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EasyFlipEstimator</title>
+<meta name="description" content="Work out the most you can safely pay for a fix-and-flip in any US ZIP code. Real local resale prices and real contractor rehab costs, on one screen.">
+<link rel="canonical" href="https://easyflipestimator.com/">
+<meta name="theme-color" content="#1A1D1F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EasyFlip">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="EasyFlipEstimator">
+<meta property="og:url" content="https://easyflipestimator.com/">
+<meta property="og:title" content="EasyFlipEstimator — know your maximum offer">
+<meta property="og:description" content="Work out the most you can safely pay for a fix-and-flip in any US ZIP code. EasyFlipEstimator prices the rehab against real contractor rates, then subtracts carrying costs, financing and selling costs to give you a maximum offer. Covers 40,846 US ZIP codes and works offline on your phone.">
+<meta property="og:image" content="https://easyflipestimator.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="EasyFlipEstimator showing a maximum offer figure">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="EasyFlipEstimator — know your maximum offer">
+<meta name="twitter:description" content="Work out the most you can safely pay for a fix-and-flip in any US ZIP code. Real local resale prices and real contractor rehab costs, on one screen.">
+<meta name="twitter:image" content="https://easyflipestimator.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"EasyFlipEstimator","url":"https://easyflipestimator.com/","applicationCategory":"BusinessApplication","operatingSystem":"Any","description":"Work out the most you can safely pay for a fix-and-flip in any US ZIP code. EasyFlipEstimator prices the rehab against real contractor rates, then subtracts carrying costs, financing and selling costs to give you a maximum offer. Covers 40,846 US ZIP codes and works offline on your phone.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Archivo+Narrow:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F0EC; --ink:#1A1D1F; --ink-2:#585E63; --ink-3:#8A9197;
+  --rule:#D6D2CA; --field:#FFFFFF; --amber:#D98A0B; --amber-soft:#FBEBCB;
+  --go:#2F7A4F; --warn:#B4450F; --shadow:rgba(26,29,31,.07);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root:not([data-theme="light"]){ @media (prefers-color-scheme: dark){
+  --paper:#15181A; --ink:#F0EEE9; --ink-2:#A6ADB3; --ink-3:#6F777D;
+  --rule:#2B3034; --field:#1D2124; --amber:#F0A937; --amber-soft:#3A2D12;
+  --go:#5FBF89; --warn:#F07A42; --shadow:rgba(0,0,0,.4);
+}}
+:root[data-theme="dark"]{
+  --paper:#15181A; --ink:#F0EEE9; --ink-2:#A6ADB3; --ink-3:#6F777D;
+  --rule:#2B3034; --field:#1D2124; --amber:#F0A937; --amber-soft:#3A2D12;
+  --go:#5FBF89; --warn:#F07A42; --shadow:rgba(0,0,0,.4);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:Archivo,'Helvetica Neue',Arial,sans-serif;
+  font-size:16px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 64px}
+
+/* ---- header: the one input that starts everything ---- */
+.head{
+  position:sticky;top:0;z-index:20;background:var(--paper);
+  padding-top:calc(12px + env(safe-area-inset-top,0px));
+  padding-bottom:10px;border-bottom:1px solid var(--rule);
+  margin:0 -16px;padding-left:16px;padding-right:16px;
+}
+.zipline{display:flex;gap:10px;align-items:stretch}
+#zip{
+  flex:0 0 130px;font-family:Archivo,sans-serif;font-weight:800;font-size:26px;
+  letter-spacing:.06em;padding:9px 12px;border:2px solid var(--ink);
+  border-radius:3px;background:var(--field);color:var(--ink);width:130px;
+  font-variant-numeric:tabular-nums;
+}
+#zip:focus{outline:3px solid var(--amber);outline-offset:1px}
+#locBtn{
+  flex:none;width:46px;border:2px solid var(--rule);border-radius:3px;
+  background:var(--field);color:var(--ink-2);cursor:pointer;display:flex;
+  align-items:center;justify-content:center;padding:0;
+}
+#locBtn:hover,#locBtn:focus-visible{border-color:var(--amber);color:var(--amber)}
+#locBtn:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+#locBtn[data-state="busy"]{color:var(--amber);border-color:var(--amber)}
+#locBtn[data-state="busy"] svg{animation:pulse 1s ease-in-out infinite}
+#locBtn[data-state="on"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){#locBtn svg{animation:none}}
+.mkt{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.mkt b{font-size:15px;font-weight:700;line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mkt span{font-family:'Archivo Narrow',sans-serif;font-size:12.5px;color:var(--ink-2);
+  line-height:1.3}
+.addrline{position:relative;margin-top:9px}
+#addr{width:100%;font-family:'Archivo Narrow',sans-serif;font-size:15px;
+  padding:10px 34px 10px 11px;border:1px solid var(--rule);border-radius:3px;
+  background:var(--field);color:var(--ink);min-height:42px}
+#addr:focus{outline:2px solid var(--amber);outline-offset:1px}
+#addrClear{position:absolute;right:4px;top:4px;width:32px;height:34px;border:none;
+  background:none;color:var(--ink-3);font-size:22px;line-height:1;cursor:pointer;padding:0}
+#sugg{position:absolute;left:0;right:0;top:calc(100% + 3px);z-index:40;margin:0;padding:4px 0;
+  list-style:none;background:var(--field);border:1px solid var(--ink);border-radius:3px;
+  box-shadow:0 8px 22px var(--shadow);max-height:46vh;overflow-y:auto}
+#sugg li{padding:11px 12px;font-family:'Archivo Narrow',sans-serif;font-size:14.5px;
+  cursor:pointer;line-height:1.3;border-bottom:1px dotted var(--rule)}
+#sugg li:last-child{border-bottom:none}
+#sugg li small{display:block;color:var(--ink-2);font-size:12.5px}
+#sugg li[aria-selected="true"],#sugg li:hover{background:var(--amber-soft)}
+#sugg li.msg{cursor:default;color:var(--ink-2);font-style:italic}
+.addrNote{font-family:'Archivo Narrow',sans-serif;font-size:12.5px;color:var(--ink-2);
+  margin-top:5px;line-height:1.35;min-height:1px}
+.addrNote b{color:var(--amber);font-weight:700}
+.tag{display:inline-block;font-family:'Archivo Narrow',sans-serif;font-size:11px;
+  font-weight:700;padding:1px 6px;border-radius:2px;background:var(--amber-soft);
+  color:var(--amber);margin-left:5px;vertical-align:1px}
+
+/* ---- the answer ---- */
+.answer{padding:22px 0 6px;text-align:left}
+.answer .lbl{font-family:'Archivo Narrow',sans-serif;font-size:13px;color:var(--ink-2);
+  letter-spacing:.02em}
+.big{font-size:clamp(44px,15vw,68px);font-weight:900;line-height:.94;
+  letter-spacing:-.035em;font-variant-numeric:tabular-nums;margin:2px 0 0;
+  display:block;transition:color .15s}
+.big.bad{color:var(--warn)}
+.sub{font-family:'Archivo Narrow',sans-serif;font-size:14px;color:var(--ink-2);
+  margin-top:7px;font-variant-numeric:tabular-nums}
+.sub em{font-style:normal;color:var(--ink);font-weight:600}
+
+#share{
+  margin-top:15px;display:inline-flex;align-items:center;gap:8px;
+  font-family:Archivo,sans-serif;font-size:14.5px;font-weight:600;
+  padding:11px 17px;min-height:44px;border:2px solid var(--ink);border-radius:3px;
+  background:var(--ink);color:var(--paper);cursor:pointer;
+}
+#share:active{transform:translateY(1px)}
+#share:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+#share[data-ok="1"]{background:var(--go);border-color:var(--go)}
+
+/* ---- gauge ---- */
+.gauge{margin:16px 0 4px}
+.gtrack{height:9px;background:var(--rule);border-radius:2px;position:relative;overflow:hidden}
+.gfill{height:100%;background:var(--go);width:0;transition:width .2s,background .2s}
+.gfill.over{background:var(--warn)}
+.gmark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55}
+.grow{display:flex;justify-content:space-between;font-family:'Archivo Narrow',sans-serif;
+  font-size:12.5px;color:var(--ink-2);margin-top:5px}
+.grow b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ---- repair budget ---- */
+.budget{border:2px solid var(--ink);border-radius:3px;padding:13px 14px 11px;margin:18px 0 20px;
+  background:var(--field)}
+.bhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
+.bhead span{font-family:'Archivo Narrow',sans-serif;font-size:13px;color:var(--ink-2);
+  letter-spacing:.02em}
+.bhead b{font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bbar{display:flex;height:10px;border-radius:2px;overflow:hidden;background:var(--rule);
+  margin-bottom:9px}
+.bbar i{display:block;height:100%;transition:width .2s}
+#bMat{background:var(--amber)}
+#bLab{background:var(--ink)}
+.brow{display:grid;grid-template-columns:1fr auto 44px;gap:10px;align-items:baseline;
+  padding:5px 0;font-family:'Archivo Narrow',sans-serif;font-size:14.5px;
+  border-top:1px dotted var(--rule)}
+.brow span:nth-child(2){font-family:Archivo,sans-serif;font-weight:600;
+  font-variant-numeric:tabular-nums;text-align:right}
+.brow .pct{color:var(--ink-3);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+.brow.sub{font-size:13px;color:var(--ink-2)}
+.brow.sub span:nth-child(2){font-weight:500;color:var(--ink-2)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;
+  vertical-align:0}
+.dot.m{background:var(--amber)} .dot.l{background:var(--ink)}
+.bfoot{font-family:'Archivo Narrow',sans-serif;font-size:12px;color:var(--ink-3);
+  padding-top:7px;line-height:1.35}
+@media (prefers-reduced-motion:reduce){.bbar i{transition:none}}
+
+/* ---- panels ---- */
+details{border-top:1px solid var(--rule);background:transparent}
+details:last-of-type{border-bottom:1px solid var(--rule)}
+summary{
+  list-style:none;cursor:pointer;padding:14px 2px;display:flex;
+  align-items:baseline;gap:9px;font-weight:600;font-size:15.5px;
+  -webkit-tap-highlight-color:transparent;
+}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";margin-left:auto;font-weight:400;font-size:21px;
+  color:var(--ink-3);line-height:1}
+details[open]>summary::after{content:"–"}
+summary .val{font-family:'Archivo Narrow',sans-serif;font-weight:400;
+  font-size:13.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.body{padding:2px 2px 20px}
+
+/* ---- controls ---- */
+.row{display:flex;align-items:center;gap:12px;padding:9px 0;
+  border-bottom:1px dotted var(--rule)}
+.row:last-child{border-bottom:none}
+.row label{flex:1;min-width:0;font-family:'Archivo Narrow',sans-serif;font-size:14.5px}
+.row .n{font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink-2);
+  min-width:68px;text-align:right}
+input[type=number],select{
+  font-family:Archivo,sans-serif;font-size:15px;padding:8px 9px;border:1px solid var(--rule);
+  border-radius:3px;background:var(--field);color:var(--ink);min-height:40px;
+  font-variant-numeric:tabular-nums;
+}
+input[type=number]{width:88px;text-align:right}
+select{flex:1;min-width:0;max-width:210px}
+input:focus,select:focus{outline:2px solid var(--amber);outline-offset:1px}
+input[type=range]{flex:1;min-width:0;accent-color:var(--amber);height:34px}
+
+.trade{display:flex;align-items:center;gap:11px;padding:10px 0;
+  border-bottom:1px dotted var(--rule)}
+.trade:last-child{border-bottom:none}
+.trade input[type=checkbox]{width:23px;height:23px;accent-color:var(--amber);flex:none;margin:0}
+.trade .nm{flex:1;min-width:0;font-family:'Archivo Narrow',sans-serif;font-size:14.5px;
+  line-height:1.25}
+.split{display:flex;gap:6px;margin:-4px 0 8px 34px}
+.split.off{display:none}
+.ml{flex:1;display:flex;justify-content:space-between;align-items:baseline;gap:6px;
+  font-family:'Archivo Narrow',sans-serif;font-size:12.5px;color:var(--ink-2);
+  background:var(--field);border:1px solid var(--rule);border-radius:3px;
+  padding:6px 8px;cursor:pointer;min-height:34px}
+.ml b{font-family:Archivo,sans-serif;font-weight:600;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.ml.mine{border-color:var(--amber)}
+.ml.mine b{color:var(--amber)}
+.ml:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.trade .amt.tot{cursor:default;border:none}
+.trade .amt{font-variant-numeric:tabular-nums;font-size:14px;min-width:74px;text-align:right;
+  color:var(--ink-2);background:none;border:1px dashed transparent;border-radius:3px;
+  padding:4px 6px;cursor:pointer;font-family:Archivo,sans-serif}
+.trade .amt:hover{border-color:var(--rule)}
+.trade .amt:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.trade .amt.mine{color:var(--amber);font-weight:700;border-color:var(--amber);border-style:solid}
+.mltot{font-family:'Archivo Narrow',sans-serif;font-size:13px;color:var(--ink-2);
+  padding:2px 0 10px;border-bottom:1px solid var(--rule);margin-bottom:6px}
+.mltot b{color:var(--ink);font-family:Archivo,sans-serif;font-variant-numeric:tabular-nums}
+.ovbar{display:flex;align-items:center;gap:10px;font-family:'Archivo Narrow',sans-serif;
+  font-size:12.5px;color:var(--amber);padding:8px 0 0}
+.ovbar button{font-family:'Archivo Narrow',sans-serif;font-size:12.5px;padding:4px 9px;
+  border:1px solid var(--amber);border-radius:3px;background:none;color:var(--amber);cursor:pointer}
+.trade.off .nm,.trade.off .amt{opacity:.38}
+.master{border:1px solid var(--ink);border-radius:3px;padding:12px 13px 8px;margin-bottom:16px}
+.mhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+.mhead span{font-family:'Archivo Narrow',sans-serif;font-size:14.5px}
+.mhead b{font-size:15px;font-weight:700;color:var(--amber)}
+.master input[type=range]{width:100%;margin:2px 0 0}
+.mscale{display:flex;justify-content:space-between;font-family:'Archivo Narrow',sans-serif;
+  font-size:11.5px;color:var(--ink-3);margin-top:-2px}
+.dwrow{border-bottom:1px solid var(--rule);padding-bottom:12px}
+.dwrow label{display:flex;align-items:baseline;gap:8px}
+.dwrow input[type=range]{max-width:180px}
+.dwlbl{margin-left:0;margin-top:2px;margin-bottom:14px}
+.q{width:100%;margin:4px 0 0;accent-color:var(--amber)}
+.qlbl{font-family:'Archivo Narrow',sans-serif;font-size:11.5px;color:var(--amber);
+  font-weight:700;margin-left:34px;margin-top:-4px;margin-bottom:8px}
+
+.seg{display:flex;gap:0;border:1px solid var(--ink);border-radius:3px;overflow:hidden;
+  margin-bottom:14px}
+.seg button{flex:1;font-family:Archivo,sans-serif;font-size:14px;font-weight:600;
+  padding:11px 4px;border:none;background:var(--field);color:var(--ink-2);cursor:pointer;
+  border-right:1px solid var(--rule);min-height:44px}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+.ledger{font-family:'Archivo Narrow',sans-serif;font-size:14px}
+.ledger div{display:flex;justify-content:space-between;padding:6px 0;
+  border-bottom:1px dotted var(--rule)}
+.ledger div:last-child{border-bottom:none;border-top:2px solid var(--ink);
+  font-weight:700;font-size:15.5px;padding-top:9px;margin-top:3px}
+.ledger span:last-child{font-variant-numeric:tabular-nums}
+.ledger .neg span:last-child{color:var(--warn)}
+
+.note{font-family:'Archivo Narrow',sans-serif;font-size:12.5px;color:var(--ink-2);
+  padding:10px 0 0;line-height:1.4}
+.alert{background:var(--amber-soft);border-left:3px solid var(--warn);
+  padding:10px 12px;margin:12px 0 0;font-family:'Archivo Narrow',sans-serif;
+  font-size:13.5px;line-height:1.4;border-radius:0 3px 3px 0}
+.foot{font-family:'Archivo Narrow',sans-serif;font-size:12px;color:var(--ink-3);
+  padding:22px 0 0;line-height:1.5}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="zipline">
+      <input id="zip" inputmode="numeric" maxlength="5" value="77002" aria-label="ZIP code">
+      <button id="locBtn" title="Use my location" aria-label="Use my location">
+        <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+          <path fill="currentColor" d="M12 2a1 1 0 0 1 .92.61l7 16.5a1 1 0 0 1-1.32 1.3L12 17.2l-6.6 3.2a1 1 0 0 1-1.32-1.3l7-16.5A1 1 0 0 1 12 2Z"/>
+        </svg>
+      </button>
+      <div class="mkt">
+        <b id="mktName">—</b>
+        <span id="mktStats"></span>
+      </div>
+    </div>
+    <div class="addrline">
+      <input id="addr" type="text" inputmode="text" autocomplete="off" autocapitalize="words"
+             spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false"
+             aria-controls="sugg" placeholder="Start typing an address (optional)"
+             aria-label="Street address">
+      <button id="addrClear" aria-label="Clear address" hidden>&times;</button>
+      <ul id="sugg" role="listbox" hidden></ul>
+    </div>
+    <div class="addrNote" id="addrNote"></div>
+  </div>
+
+  <div class="answer">
+    <div class="lbl">Don't pay more than</div>
+    <span class="big" id="mao">$0</span>
+    <div class="sub" id="maoSub"></div>
+    <button id="share">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor"
+        d="M12 3l4 4h-3v8h-2V7H8l4-4zM5 13v6h14v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6h2z"/></svg>
+      <span id="shareTxt">Send this deal</span>
+    </button>
+  </div>
+
+  <div class="gauge">
+    <div class="gtrack"><div class="gfill" id="gfill"></div><div class="gmark" id="gmark"></div></div>
+    <div class="grow"><span id="gLeft">—</span><span id="gRight">ceiling 40%</span></div>
+  </div>
+  <div id="alertBox"></div>
+
+  <section class="budget" aria-label="Repair budget">
+    <div class="bhead"><span>Repair budget</span><b id="bTotal">$0</b></div>
+    <div class="bbar" aria-hidden="true"><i id="bMat"></i><i id="bLab"></i></div>
+    <div class="brow"><span><em class="dot m"></em>Materials</span>
+      <span id="bMatV">$0</span><span class="pct" id="bMatP">0%</span></div>
+    <div class="brow"><span><em class="dot l"></em>Labor</span>
+      <span id="bLabV">$0</span><span class="pct" id="bLabP">0%</span></div>
+    <div class="brow sub"><span>Running the job</span><span id="bGc">$0</span><span class="pct"></span></div>
+    <div class="brow sub"><span>Contingency</span><span id="bCont">$0</span><span class="pct"></span></div>
+    <div class="bfoot" id="bFoot"></div>
+  </section>
+
+  <details open>
+    <summary>The house <span class="val" id="sumHouse"></span></summary>
+    <div class="body">
+      <div class="row"><label for="sqft">Square feet</label>
+        <input type="number" id="sqft" value="1500" min="300" max="8000" step="10"></div>
+      <div class="row"><label for="beds">Bedrooms</label>
+        <input type="number" id="beds" value="3" min="0" max="10"></div>
+      <div class="row"><label for="baths">Bathrooms</label>
+        <input type="number" id="baths" value="2" min="1" max="8"></div>
+      <div class="note" id="houseNote"></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Work needed <span class="val" id="sumScope"></span></summary>
+    <div class="body">
+      <div class="seg" id="scopeSeg">
+        <button data-s="cosmetic">Cosmetic</button>
+        <button data-s="standard" aria-pressed="true">Standard</button>
+        <button data-s="gut">Full gut</button>
+      </div>
+      <div class="master">
+        <div class="mhead"><span>Material quality</span><b id="mqLbl">Standard</b></div>
+        <input type="range" id="mq" min="0" max="4" step="1" value="1"
+               aria-label="Material quality for every trade">
+        <div class="mscale"><span>Builder</span><span>Luxury</span></div>
+      </div>
+      <div class="row dwrow"><label for="dw">Drywall repair
+          <span class="n" id="dwAmt">—</span></label>
+        <input type="range" id="dw" min="0" max="5" step="1" value="2"
+               aria-label="How much drywall needs repair"></div>
+      <div class="qlbl dwlbl" id="dwLbl"></div>
+      <div class="mltot" id="mlTotals"></div>
+      <div id="trades"></div>
+      <div class="ovbar" id="ovBar"></div>
+      <div class="note">Every trade is split into materials and labor. Tap either one to
+        enter your own number — a supplier quote, a sub's bid, or what your crew actually
+        charges. Anything you leave alone stays on the estimate. The quality slider changes
+        materials only; labor stays the same whether the faucet is $80 or $300.</div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Time &amp; carry <span class="val" id="sumHold"></span></summary>
+    <div class="body">
+      <div class="row"><label for="hold">How long you'll own it</label>
+        <select id="hold">
+          <option value="auto" selected>Use local market speed</option>
+          <option value="90">3 months</option><option value="180">6 months</option>
+          <option value="270">9 months</option><option value="365">12 months</option>
+          <option value="548">18 months</option><option value="730">24 months</option>
+        </select></div>
+      <div class="row"><label for="ins">Insurance</label>
+        <select id="ins">
+          <option value="42" selected>Vacant, minimal — $42/mo</option>
+          <option value="125">Builders risk — $125/mo</option>
+          <option value="350">Coastal / high wind — $350/mo</option>
+          <option value="600">Occupied coverage — $600/mo</option>
+          <option value="0">None</option>
+        </select></div>
+      <div class="row"><label for="util">Utilities</label>
+        <select id="util">
+          <option value="13" selected>Disconnected — $13/mo</option>
+          <option value="75">Power only — $75/mo</option>
+          <option value="180">Full, vacant — $180/mo</option>
+          <option value="280">Full + climate — $280/mo</option>
+        </select></div>
+      <div class="row"><label for="yard">Yard</label>
+        <select id="yard">
+          <option value="0">None</option>
+          <option value="60" selected>Monthly cleanup — $60/mo</option>
+          <option value="130">Biweekly mow — $130/mo</option>
+          <option value="260">Weekly mow — $260/mo</option>
+        </select></div>
+      <div class="note" id="holdNote"></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Money <span class="val" id="sumMoney"></span></summary>
+    <div class="body">
+      <div class="row"><label for="fin">How you're paying</label>
+        <select id="fin">
+          <option value="cash">Cash</option>
+          <option value="12,2" selected>Hard money — 12% + 2 pts</option>
+          <option value="10,3">Hard money — 10% + 3 pts</option>
+          <option value="8,1">Private lender — 8% + 1 pt</option>
+          <option value="7.5,0">Conventional — 7.5%</option>
+        </select></div>
+      <div class="row"><label for="gc">Who runs the job</label>
+        <select id="gc">
+          <option value="0.10" selected>You manage it — 10%</option>
+          <option value="0.18">Hired GC — 18%</option>
+          <option value="0.25">Hired GC, small job — 25%</option>
+        </select></div>
+      <div class="row"><label for="cont">Contingency <span class="n" id="contN">20%</span></label>
+        <input type="range" id="cont" min="12" max="25" step="1" value="20"></div>
+      <div class="row"><label for="marg">Profit target <span class="n" id="margN">20%</span></label>
+        <input type="range" id="marg" min="8" max="35" step="1" value="20"></div>
+      <div class="note" id="marginNote"></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Where the money goes <span class="val" id="sumLedger"></span></summary>
+    <div class="body"><div class="ledger" id="ledger"></div>
+      <div class="note" id="arvNote"></div></div>
+  </details>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script src="/config.js"></script>
+<script>
+let DATA=null;
+
+const SCOPE={
+ cosmetic:["Interior paint","Flooring LVP","Fixtures & devices","Dumpster & debris haul"],
+ standard:["Interior paint","Exterior paint","Flooring LVP","Tear-off & replace 3-tab/architectural",
+  "Interior doors & trim","Cabinets (stock)","Countertops","Appliance package",
+  "Refresh (vanity/toilet/tile/fixtures)","Fixtures & devices",
+  "Full system replace (condenser + air handler)","Dumpster & debris haul","Permits"],
+ gut:["Full drywall replace","Interior paint","Exterior paint","Flooring LVP",
+  "Tear-off & replace 3-tab/architectural","Interior doors & trim","Cabinets (stock)",
+  "Countertops","Appliance package","Full bath gut & rebuild","Whole-house rewire",
+  "Repipe supply lines","Full system replace (condenser + air handler)","Ductwork replacement",
+  "Insulation (attic blown)","Panel upgrade 200A","Water heater","Windows",
+  "Dumpster & debris haul","Permits"]};
+const PER_SQFT=new Set(["Interior paint","Exterior paint","Flooring LVP","Carpet",
+  "Full drywall replace","Insulation (attic blown)","Siding replacement"]);
+const TIER_NAMES=["builder","standard","mid","high","luxury"];
+const TIER_LABEL={builder:"Builder grade",standard:"Standard",mid:"Upgraded",
+  high:"High end",luxury:"Luxury"};
+const DW=[
+ {t:"None",a:0},{t:"A few patches",a:9},{t:"One wall",a:150},
+ {t:"One room",a:460},{t:"Several rooms",a:1400},{t:"Whole house",a:null}];
+const SHORT={"Tear-off & replace 3-tab/architectural":"Roof — tear off & replace",
+ "Full system replace (condenser + air handler)":"HVAC — full system",
+ "Refresh (vanity/toilet/tile/fixtures)":"Bathrooms — refresh",
+ "Full bath gut & rebuild":"Bathrooms — full rebuild",
+ "Fixtures & devices":"Lighting & outlets","Cabinets (stock)":"Kitchen cabinets",
+ "Interior doors & trim":"Interior doors & trim","Dumpster & debris haul":"Dumpster & haul-off",
+ "Full drywall replace":"Drywall — hang & finish","Flooring LVP":"Flooring",
+ "Whole-house rewire":"Rewire","Repipe supply lines":"Repipe","Panel upgrade 200A":"Panel upgrade",
+ "Insulation (attic blown)":"Attic insulation","Ductwork replacement":"Ductwork",
+ "Appliance package":"Appliances","Water heater":"Water heater","Windows":"Windows",
+ "Countertops":"Countertops","Interior paint":"Interior paint","Exterior paint":"Exterior paint",
+ "Permits":"Permits"};
+
+const ZIDX=new Map();
+function zipInfo(z){const r=ZIDX.get(z); if(!r) return null;
+  return{zip:r[0],city:r[1],state:DATA.states[r[2]],metro:DATA.metros[r[3]],psf:r[4],
+    src:DATA.srcs[r[5]],conf:DATA.confs[r[6]],medSqft:r[7],dom:r[8],reduced:r[9],
+    temp:r[10],fc:r[11],idx:r[12],tax:r[13],lat:r[14],lon:r[15],acsVal:r[16],soldPpsf:r[17],s2lReal:r[18],nSold:r[19]};}
+
+const $=id=>document.getElementById(id);
+const money=n=>(n<0?"-$":"$")+Math.abs(Math.round(n)).toLocaleString();
+let scope="standard", trades={}, quality={}, overrides={}, lastParts={}, ovM={}, ovL={};
+
+function defaultTier(psf){return psf>=600?"luxury":psf>=400?"high":psf>=250?"mid":psf>=120?"standard":"builder";}
+
+function qty(item,sqft,beds,baths){
+  if(PER_SQFT.has(item))return sqft;
+  if(item==="Tear-off & replace 3-tab/architectural")return sqft*1.2;
+  if(item==="Interior doors & trim")return beds+baths+3;
+  if(item==="Windows")return Math.max(6,Math.round(sqft/130));
+  if(item==="Full bath gut & rebuild"||item==="Refresh (vanity/toilet/tile/fixtures)")return baths;
+  if(item==="Cabinets (stock)")return sqft<1500?14:20;
+  if(item==="Countertops")return sqft<1500?35:50;
+  if(item==="Dumpster & debris haul")return sqft<1200?1:2;
+  return 1;}
+
+function lineSplit(item,q,idx,tier){
+  let base;
+  const s=DATA.scaling[item];
+  if(s) base=Math.max(s[2],s[0]+s[1]*q)*idx;
+  else if(DATA.flat[item]!=null) base=DATA.flat[item]*q*idx;
+  else return null;
+  const m=DATA.mat[item];
+  const ms=(m&&m[0]!=null)?m[0]:0.5;
+  const mult=(m&&m[1])?(DATA.tiers[tier]??1):1;   // quality tier moves material only
+  return {mat:base*ms*mult, lab:base*(1-ms)};
+}
+
+function lineCost(item,q,idx,tier){
+  let base;
+  const s=DATA.scaling[item];
+  if(s) base=Math.max(s[2],s[0]+s[1]*q)*idx;
+  else if(DATA.flat[item]!=null) base=DATA.flat[item]*q*idx;
+  else return 0;
+  const m=DATA.mat[item];
+  if(m&&m[1]&&m[0]!=null){const mm=DATA.tiers[tier]??1; base*=(1-m[0])+m[0]*mm;}
+  return base;}
+
+function setScope(s){
+  scope=s; trades={};
+  document.querySelectorAll("#scopeSeg button").forEach(b=>
+    b.setAttribute("aria-pressed",b.dataset.s===s?"true":"false"));
+  SCOPE[s].forEach(t=>trades[t]=true);
+  $("dw").value = s==="cosmetic"?1 : s==="standard"?3 : 5;
+  renderTrades(); calc();}
+
+function renderTrades(){
+  const z=zipInfo($("zip").value); if(!z)return;
+  const all=[...new Set([...SCOPE.gut,...SCOPE.standard,...SCOPE.cosmetic])];
+  const el=$("trades"); el.innerHTML="";
+  setTimeout(syncMaster,0);
+  all.forEach(t=>{
+    if(quality[t]==null) quality[t]=defaultTier(z.psf);
+    const on=!!trades[t], sens=DATA.mat[t]&&DATA.mat[t][1];
+    const d=document.createElement("div");
+    d.className="trade"+(on?"":" off");
+    d.innerHTML=`<input type="checkbox" ${on?"checked":""} aria-label="${SHORT[t]||t}">
+      <span class="nm">${SHORT[t]||t}</span>
+      <span class="amt tot" data-amt="${t}"></span>`;
+    d.querySelector("input[type=checkbox]").onchange=e=>{trades[t]=e.target.checked;
+      d.className="trade"+(e.target.checked?"":" off");
+      sp.className="split"+(e.target.checked?"":" off");calc();};
+    el.appendChild(d);
+    const sp=document.createElement("div");
+    sp.className="split"+(on?"":" off");
+    sp.innerHTML=`<button class="ml" data-m="${t}">Materials <b></b></button>
+      <button class="ml" data-l="${t}">Labor <b></b></button>`;
+    sp.querySelector("[data-m]").onclick=()=>editPart(t,"m");
+    sp.querySelector("[data-l]").onclick=()=>editPart(t,"l");
+    el.appendChild(sp);
+    if(sens){
+      const i=document.createElement("input");
+      i.type="range";i.className="q";i.min=0;i.max=4;i.step=1;
+      i.value=TIER_NAMES.indexOf(quality[t]);
+      i.setAttribute("aria-label",(SHORT[t]||t)+" material quality");
+      const lbl=document.createElement("div");
+      lbl.className="qlbl";lbl.textContent=TIER_LABEL[quality[t]];
+      i.oninput=e=>{quality[t]=TIER_NAMES[+e.target.value];
+        lbl.textContent=TIER_LABEL[quality[t]];syncMaster();calc();};
+      el.appendChild(i);el.appendChild(lbl);
+    }});}
+
+function editPrice(item){
+  const name=SHORT[item]||item;
+  const cur=(lastParts&&lastParts[item])||0;
+  const has=overrides[item]!=null;
+  const msg=has
+    ? `Your price for ${name}.\nNow $${Math.round(overrides[item]).toLocaleString()}. Blank to go back to the estimate.`
+    : `Your price for ${name}.\nEstimate is $${Math.round(cur).toLocaleString()}. Blank to keep it.`;
+  const val=window.prompt(msg, has?Math.round(overrides[item]):"");
+  if(val===null) return;
+  const n=parseFloat(String(val).replace(/[^0-9.]/g,""));
+  if(!val.trim()||!Number.isFinite(n)||n<0) delete overrides[item];
+  else overrides[item]=n;
+  renderTrades(); calc();
+}
+
+function editPart(item,which){
+  const name=SHORT[item]||item, part=which==="m"?"materials":"labor";
+  const store=which==="m"?ovM:ovL;
+  const est=(lastParts[item]&&lastParts[item][which==="m"?"estM":"estL"])||0;
+  const has=store[item]!=null;
+  const val=window.prompt(
+    `${name} — ${part}.\nEstimate: $${Math.round(est).toLocaleString()}`+
+    (has?`\nYours: $${Math.round(store[item]).toLocaleString()}`:"")+
+    `\n\nEnter your price, or leave blank to use the estimate.`,
+    has?Math.round(store[item]):"");
+  if(val===null) return;
+  const n=parseFloat(String(val).replace(/[^0-9.]/g,""));
+  if(!val.trim()||!Number.isFinite(n)||n<0) delete store[item]; else store[item]=n;
+  calc();
+}
+
+function syncMaster(){
+  const t=Object.keys(DATA.mat).filter(k=>DATA.mat[k][1]).map(k=>quality[k]||"standard");
+  const all=t.every(v=>v===t[0]);
+  $("mqLbl").textContent= all ? TIER_LABEL[t[0]] : "Mixed";
+  if(all) $("mq").value=TIER_NAMES.indexOf(t[0]);
+}
+
+function calc(){
+  const z=zipInfo($("zip").value);
+  if(!z){$("mktName").textContent="ZIP not found";$("mktStats").textContent=
+    "Enter a 5-digit US ZIP code.";return;}
+  const sqft=+$("sqft").value||1000, beds=+$("beds").value||3, baths=+$("baths").value||1;
+
+  $("mktName").innerHTML=`${z.city}, ${z.state}`+
+    (z.src!=="zip"?`<span class="tag">${z.src} data</span>`:"");
+  $("mktStats").textContent = z.soldPpsf
+    ? `$${Math.round(z.soldPpsf)}/sqft sold · sells in ${z.dom} days · ${z.metro}`
+    : `$${z.psf}/sqft asking · sells in ${z.dom} days · ${z.metro}`;
+
+  // ARV as a range
+  const adj = tractAdj ? Math.min(Math.max(tractAdj.ratio,0.35),3.0) : 1;
+  let basis, s2l, valSrc, band;
+  if(z.soldPpsf){
+    basis=z.soldPpsf; s2l=1; valSrc="sold";
+    band = z.nSold>=30 ? .05 : z.nSold>=12 ? .07 : .10;
+  }else if(z.s2lReal){
+    basis=z.psf; s2l=z.s2lReal; valSrc="list_real";
+    band={high:.07,medium:.10,low:.16}[z.conf];
+  }else{
+    basis=z.psf; s2l=1-0.22*z.reduced; valSrc="estimate";
+    band={high:.08,medium:.12,low:.18}[z.conf];
+  }
+  const mid=basis*adj*sqft*s2l, arvLo=mid*(1-band), arvHi=mid*(1+band), arv=(arvLo+arvHi)/2;
+
+  // rehab
+  let hard=0, matTot=0, labTot=0, parts={};
+  Object.keys(trades).forEach(t=>{
+    const sp=lineSplit(t,qty(t,sqft,beds,baths),z.idx,quality[t]||"standard");
+    if(!sp) return;
+    const mat=ovM[t]!=null?ovM[t]:sp.mat, lab=ovL[t]!=null?ovL[t]:sp.lab;
+    parts[t]={mat,lab,tot:mat+lab,estM:sp.mat,estL:sp.lab};
+    if(!trades[t]) return;
+    hard+=mat+lab; matTot+=mat; labTot+=lab;
+  });
+  lastParts=parts;
+  document.querySelectorAll("[data-amt]").forEach(e=>{
+    const t=e.dataset.amt, p=parts[t];
+    e.textContent=p?money(p.tot):"—";
+    e.className="amt tot"+((ovM[t]!=null||ovL[t]!=null)?" mine":"");});
+  document.querySelectorAll("[data-m]").forEach(b=>{const t=b.dataset.m,p=parts[t];
+    b.querySelector("b").textContent=p?money(p.mat):"—"; b.className="ml"+(ovM[t]!=null?" mine":"");});
+  document.querySelectorAll("[data-l]").forEach(b=>{const t=b.dataset.l,p=parts[t];
+    b.querySelector("b").textContent=p?money(p.lab):"—"; b.className="ml"+(ovL[t]!=null?" mine":"");});
+  const nOv=Object.keys(ovM).length+Object.keys(ovL).length+
+    (overrides["Drywall repair & texture"]!=null?1:0);
+  $("ovBar").innerHTML = nOv
+    ? `<span>${nOv} price${nOv>1?"s":""} entered by you</span><button id="ovClear">Reset all</button>`
+    : "";
+  if(nOv) $("ovClear").onclick=()=>{ovM={};ovL={};overrides={};renderTrades();calc();};
+
+  const dwi=+$("dw").value, dwp=DW[dwi];
+  const dwArea = dwp.a===null ? sqft*3.2 : dwp.a;
+  let dwCost=0;
+  if(dwArea>0 && !trades["Full drywall replace"]){
+    dwCost = overrides["Drywall repair & texture"]!=null
+      ? overrides["Drywall repair & texture"]
+      : Math.max(300,19.8*Math.pow(dwArea,0.614))*z.idx;
+    hard+=dwCost; matTot+=dwCost*0.20; labTot+=dwCost*0.80;
+  }
+  $("dwAmt").textContent = trades["Full drywall replace"] ? "in full replace"
+    : (dwCost?money(dwCost):"—");
+  $("dwAmt").className = "n"+(overrides["Drywall repair & texture"]!=null?" mine":"");
+  $("dwLbl").textContent = trades["Full drywall replace"]
+    ? "Hanging new board already covers this."
+    : dwi===0 ? "No drywall work."
+    : `${dwp.t} — about ${Math.round(dwArea).toLocaleString()} sqft of board. `+
+      (dwi<=1?"Crew minimum sets the price at this size.":"Patching runs more per foot than hanging new sheets.");
+
+  const gcPct=+$("gc").value, contPct=+$("cont").value/100;
+  const gc=hard*gcPct, cont=hard*contPct, rehab=hard+gc+cont;
+
+  // hold
+  const hv=$("hold").value;
+  const holdDays= hv==="auto" ? Math.round(7+21+rehab/1500+z.dom+35) : +hv;
+  const months=holdDays/30.4;
+
+  const ins=+$("ins").value, util=+$("util").value, yard=+$("yard").value;
+  const taxRate = tractAdj ? tractAdj.rate : z.tax;
+  const taxBase = assessed || arv;
+  const taxes=taxBase*taxRate/12*months;
+  const holding=(ins+util+yard)*months+taxes;
+
+  // gauge: scope vs ARV. Contingency and selling excluded by design.
+  const gaugeCost=hard+gc+holding, gaugePct=gaugeCost/arv;
+
+  const margPct=+$("marg").value/100, margin=arv*margPct, selling=arv*0.07;
+  const fv=$("fin").value, cash=fv==="cash";
+  let rate=0,pts=0; if(!cash){const p=fv.split(",");rate=+p[0]/100;pts=+p[1]/100;}
+
+  let offer=arv*0.5, fin=0;
+  for(let i=0;i<60;i++){
+    if(!cash){const loan=(offer+rehab)*0.85; fin=loan*pts+loan*rate/12*months;}
+    const n=arv-rehab-holding-fin-selling-offer*0.02-margin;
+    if(Math.abs(n-offer)<1){offer=n;break;} offer=n;}
+
+  // paint the screen
+  const bad=offer<=0;
+  const el=$("mao"); el.textContent=bad?"No offer works":money(offer);
+  el.className="big"+(bad?" bad":"");
+  $("maoSub").innerHTML= bad
+    ? `Costs exceed what this house can sell for. Cut scope or walk.`
+    : `Sells for <em>${money(arvLo)}–${money(arvHi)}</em> after repairs · you keep <em>${money(margin)}</em>`;
+
+  const pct=Math.min(gaugePct/0.55,1)*100;
+  $("gfill").style.width=pct+"%";
+  $("gfill").className="gfill"+(gaugePct>0.40?" over":"");
+  $("gmark").style.left=(0.40/0.55*100)+"%";
+  $("gLeft").innerHTML=`Job + carry <b>${money(gaugeCost)}</b> — ${(gaugePct*100).toFixed(0)}% of resale`;
+
+  $("alertBox").innerHTML = gaugePct>0.40
+    ? `<div class="alert">This much work on a house worth ${money(arv)} is past what
+       flips usually carry. Trim scope, drop material grade, or find a cheaper buy.</div>` : "";
+
+  $("sumHouse").textContent=`${sqft.toLocaleString()} sqft · ${beds} bd ${baths} ba`;
+  $("sumScope").textContent=
+    `${Object.values(trades).filter(Boolean).length+(dwCost?1:0)} trades · ${money(rehab)}`;
+  const mp = hard ? matTot/hard : 0;
+  $("bTotal").textContent=money(rehab);
+  $("bMat").style.width=(mp*100)+"%";
+  $("bLab").style.width=((1-mp)*100)+"%";
+  $("bMatV").textContent=money(matTot);
+  $("bLabV").textContent=money(labTot);
+  $("bMatP").textContent=Math.round(mp*100)+"%";
+  $("bLabP").textContent=Math.round((1-mp)*100)+"%";
+  $("bGc").textContent=money(gc);
+  $("bCont").textContent=money(cont);
+  const nMine=Object.keys(ovM).length+Object.keys(ovL).length;
+  $("bFoot").textContent = nMine
+    ? `${nMine} of these numbers are yours. The rest are estimates for this ZIP.`
+    : `All estimates for this ZIP. Tap materials or labor on any trade below to use your own numbers.`;
+  $("mlTotals").innerHTML=`Materials <b>${money(matTot)}</b> · Labor <b>${money(labTot)}</b>`+
+    ` · ${hard?Math.round(matTot/hard*100):0}% materials`;
+  $("sumHold").textContent=`${holdDays} days · ${money(holding)}`;
+  $("sumMoney").textContent=`${cash?"cash":"financed"} · ${(margPct*100).toFixed(0)}% profit`;
+  $("sumLedger").textContent=money(arv);
+  $("contN").textContent=$("cont").value+"%";
+  $("margN").textContent=$("marg").value+"%";
+
+  $("houseNote").textContent=`Typical house in this ZIP is ${z.medSqft.toLocaleString()} sqft.`;
+  $("holdNote").textContent= hv==="auto"
+    ? `Houses here go under contract in about ${z.dom} days. Add your rehab time and closing and you're at ${holdDays} days. Drag it longer to see what a slow sale costs.`
+    : `Property tax runs ${(z.tax*100).toFixed(2)}% a year here — ${money(taxes)} over ${holdDays} days.`;
+  $("marginNote").textContent= z.temp>=61
+    ? `This is a fast market, so a thinner spread is defensible.`
+    : z.temp<=25 ? `This market is slow. Widen the spread.`
+    : `Homes here are forecast ${z.fc>0?"up":"down"} ${Math.abs(z.fc)}% over the next year.`;
+  if(tractAdj||propNote){
+    let s="";
+    if(tractAdj){
+      const d=(tractAdj.ratio-1)*100;
+      s=`${tractAdj.name} — typical home <b>${money(tractAdj.val)}</b>, `+
+        `${d>=0?"+":""}${d.toFixed(0)}% vs the ZIP average. Prices and tax rate adjusted.`;
+    }
+    if(propNote) s+=(s?"<br>":"")+propNote;
+    $("addrNote").innerHTML=s;
+  }
+  $("arvNote").textContent =
+    valSrc==="sold"
+      ? `Resale is based on what homes here actually sold for — $${Math.round(z.soldPpsf)}/sqft across ${z.nSold} recent sales (Redfin).`
+    : valSrc==="list_real"
+      ? `Resale is based on $${z.psf}/sqft asking prices, adjusted to the ${(z.s2lReal*100).toFixed(1)}% of asking that homes here actually sell for (Redfin).`
+      : `Resale is based on $${z.psf}/sqft asking prices. No recent sales data here, so the discount to asking is estimated — treat the range as rough.`;
+
+  window.__last={offer,bad,arvLo,arvHi,hard,gc,cont,holding,fin,selling,margin,
+    holdDays,gaugePct,matTot,labTot,rehab};
+
+  const L=[["Sells for",arv],["Buy it for",-offer],["Closing on the buy",-offer*0.02],
+    ["Materials",-matTot],["Labor",-labTot],["Running the job",-gc],["Contingency",-cont],
+    ["Carrying costs",-holding],["Loan costs",-fin],["Selling costs",-selling],
+    ["You keep",arv-offer-offer*0.02-rehab-holding-fin-selling]];
+  $("ledger").innerHTML=L.map(([k,v])=>
+    `<div class="${v<0?'neg':''}"><span>${k}</span><span>${money(v)}</span></div>`).join("");
+
+  $("foot").textContent=`${DATA.zips.length.toLocaleString()} ZIP codes. Prices from Realtor.com and Zillow research data, property tax from the Census ACS, build costs from real contractor invoices. Nothing here is a substitute for walking the property.`;
+}
+
+let TRACTS=null, tractAdj=null, assessed=null, suggests=[], suggIdx=-1, suggTimer=null, suggSeq=0;
+
+/* Keys live in config.js so rebuilds of this file never clobber them. */
+const MAPBOX_TOKEN=(window.CONFIG&&window.CONFIG.MAPBOX_TOKEN)||"";
+const PROPERTY_API=(window.CONFIG&&window.CONFIG.PROPERTY_API)||"";
+
+function loadTracts(){
+  if(TRACTS) return Promise.resolve(TRACTS);
+  return fetch("/tracts.txt").then(r=>r.text()).then(txt=>{
+    TRACTS=new Map();
+    for(const rec of txt.split("|")){
+      const c=rec.split(",");
+      TRACTS.set(c[0],[+c[1]*100, +c[2]/100000]);
+    }
+    return TRACTS;
+  });
+}
+
+function fetchSuggestions(q,seq){
+  const z=zipInfo($("zip").value);
+  const near = z && z.lat!=null ? {lat:z.lat,lon:z.lon} : null;
+  let url;
+  if(MAPBOX_TOKEN){
+    url="https://api.mapbox.com/search/geocode/v6/forward?q="+encodeURIComponent(q)+
+        "&country=us&types=address&limit=6&access_token="+MAPBOX_TOKEN+
+        (near?"&proximity="+near.lon+","+near.lat:"");
+  }else{
+    url="https://photon.komoot.io/api/?q="+encodeURIComponent(q)+"&limit=6&lang=en"+
+        (near?"&lat="+near.lat+"&lon="+near.lon:"");
+  }
+  return fetch(url).then(r=>r.json()).then(j=>{
+    if(seq!==suggSeq) return null;
+    const out=[];
+    for(const f of (j.features||[])){
+      const p=f.properties||{}, c=(f.geometry||{}).coordinates||[];
+      if(MAPBOX_TOKEN){
+        const ctx=p.context||{};
+        out.push({line:p.name||p.full_address||"",
+          sub:[ctx.place&&ctx.place.name, ctx.region&&ctx.region.region_code,
+               ctx.postcode&&ctx.postcode.name].filter(Boolean).join(", "),
+          lon:c[0], lat:c[1], zip:ctx.postcode?ctx.postcode.name:null});
+      }else{
+        if(p.countrycode && p.countrycode!=="US") continue;
+        const line=[p.housenumber,p.street||p.name].filter(Boolean).join(" ");
+        if(!line) continue;
+        out.push({line, sub:[p.city,p.state,p.postcode].filter(Boolean).join(", "),
+          lon:c[0], lat:c[1], zip:p.postcode||null});
+      }
+    }
+    return out;
+  });
+}
+
+function renderSuggestions(list,msg){
+  const ul=$("sugg");
+  suggests=list||[]; suggIdx=-1;
+  if(msg){ ul.innerHTML='<li class="msg">'+msg+'</li>'; ul.hidden=false;
+           $("addr").setAttribute("aria-expanded","true"); return; }
+  if(!suggests.length){ ul.hidden=true; $("addr").setAttribute("aria-expanded","false"); return; }
+  ul.innerHTML=suggests.map((s,i)=>
+    '<li role="option" data-i="'+i+'" aria-selected="false">'+s.line+
+    (s.sub?'<small>'+s.sub+'</small>':'')+'</li>').join("");
+  ul.hidden=false; $("addr").setAttribute("aria-expanded","true");
+  ul.querySelectorAll("li").forEach(li=>
+    li.addEventListener("mousedown",e=>{e.preventDefault();choose(+li.dataset.i);}));
+}
+
+function highlight(n){
+  const items=$("sugg").querySelectorAll('li[role="option"]');
+  if(!items.length) return;
+  suggIdx=(n+items.length)%items.length;
+  items.forEach((li,i)=>li.setAttribute("aria-selected", i===suggIdx?"true":"false"));
+  if(items[suggIdx].scrollIntoView) items[suggIdx].scrollIntoView({block:"nearest"});
+}
+
+function closeSuggestions(){
+  $("sugg").hidden=true; $("addr").setAttribute("aria-expanded","false"); suggIdx=-1;
+}
+
+function choose(i){
+  const s=suggests[i]; if(!s) return;
+  $("addr").value=s.line+(s.sub?", "+s.sub:"");
+  closeSuggestions();
+  if(s.zip && zipInfo(s.zip) && s.zip!==$("zip").value){
+    $("zip").value=s.zip; quality={}; renderTrades();
+  }
+  tractFromCoords(s.lat,s.lon);
+  fillFromProperty(s.line+(s.sub?", "+s.sub:""), s.lat, s.lon);
+}
+
+let propNote="";
+function fillFromProperty(fullAddress,lat,lon){
+  if(!PROPERTY_API) return;
+  const base=$("addrNote").textContent;
+  $("addrNote").textContent=(base?base+" ":"")+"Looking up the property…";
+  const q=PROPERTY_API+"?address="+encodeURIComponent(fullAddress)+
+    (Number.isFinite(lat)?"&lat="+lat+"&lon="+lon:"");
+  fetch(q)
+    .then(r=>r.ok?r.json():Promise.reject())
+    .then(p=>{
+      if(!p||!p.found){ propNote="No public record for this address — enter the size yourself."; calc(); return; }
+      const got=[];
+      if(p.sqft){ $("sqft").value=Math.round(p.sqft); got.push(Math.round(p.sqft).toLocaleString()+" sqft"); }
+      if(p.beds){ $("beds").value=Math.round(p.beds); got.push(Math.round(p.beds)+" bd"); }
+      if(p.baths){ $("baths").value=Math.max(1,Math.round(p.baths)); got.push(p.baths+" ba"); }
+      if(p.yearBuilt) got.push("built "+p.yearBuilt);
+      if(p.assessedValue) assessed=p.assessedValue;
+      const via = p.matchedBy==="nearby" ? " (nearest parcel on record)" : "";
+      propNote = got.length
+        ? "Public record"+via+": "+got.join(" · ")+". Change anything that looks wrong."
+        : "Found the address but no size on record — enter it yourself.";
+      if(p.yearBuilt && p.yearBuilt<1975)
+        propNote+=" Pre-1975, so check wiring and plumbing.";
+      calc();
+    })
+    .catch(()=>{ propNote="Couldn't reach the property lookup — enter the size yourself."; calc(); });
+}
+
+/* Coordinates are far more reliable than address-string matching. */
+function tractFromCoords(lat,lon){
+  $("addrNote").textContent="Checking the neighborhood…";
+  const cb="__geo"+(++suggSeq)+Date.now();
+  const s=document.createElement("script");
+  const done=()=>{try{delete window[cb];}catch(e){} s.remove();};
+  const timer=setTimeout(()=>{ $("addrNote").textContent=
+    "Couldn't reach the neighborhood lookup. Using the ZIP average."; done(); },9000);
+  window[cb]=res=>{
+    clearTimeout(timer); done();
+    try{
+      const g=res.result.geographies["Census Tracts"][0];
+      loadTracts().then(T=>{
+        const t=T.get(g.GEOID), z=zipInfo($("zip").value);
+        if(!t||!z||!z.acsVal){ $("addrNote").textContent=
+          "No neighborhood value data here. Using the ZIP average."; return; }
+        tractAdj={ratio:t[0]/z.acsVal, rate:t[1], name:g.NAME, val:t[0]};
+        calc();
+      });
+    }catch(e){ $("addrNote").textContent="Using the ZIP average for this one."; }
+  };
+  s.src="https://geocoding.geo.census.gov/geocoder/geographies/coordinates?x="+lon+
+        "&y="+lat+"&benchmark=Public_AR_Current&vintage=Current_Current"+
+        "&format=jsonp&callback="+cb;
+  s.onerror=()=>{clearTimeout(timer);
+    $("addrNote").textContent="Neighborhood lookup unavailable. Using the ZIP average."; done();};
+  document.body.appendChild(s);
+}
+
+$("addr").addEventListener("input",e=>{
+  const q=e.target.value.trim();
+  $("addrClear").hidden = !q;
+  if(tractAdj||propNote){ tractAdj=null; propNote=""; assessed=null;
+    $("addrNote").textContent=""; calc(); }
+  clearTimeout(suggTimer);
+  if(q.length<4){ closeSuggestions(); return; }
+  const seq=++suggSeq;
+  suggTimer=setTimeout(()=>{
+    renderSuggestions(null,"Searching…");
+    fetchSuggestions(q,seq).then(list=>{
+      if(list===null) return;
+      if(!list.length) renderSuggestions(null,"No matches. Try house number and street.");
+      else renderSuggestions(list);
+    }).catch(()=>renderSuggestions(null,"Address search unavailable — the ZIP estimate still works."));
+  },280);
+});
+
+$("addr").addEventListener("keydown",e=>{
+  if($("sugg").hidden) return;
+  if(e.key==="ArrowDown"){e.preventDefault();highlight(suggIdx+1);}
+  else if(e.key==="ArrowUp"){e.preventDefault();highlight(suggIdx-1);}
+  else if(e.key==="Enter"){ if(suggIdx>=0){e.preventDefault();choose(suggIdx);} }
+  else if(e.key==="Escape"){closeSuggestions();}
+});
+$("addr").addEventListener("blur",()=>setTimeout(closeSuggestions,120));
+$("addrClear").addEventListener("click",()=>{
+  $("addr").value=""; $("addrClear").hidden=true; closeSuggestions();
+  if(tractAdj||propNote){tractAdj=null;propNote="";assessed=null;
+    $("addrNote").textContent="";calc();}
+  $("addr").focus();
+});
+
+function nearestZip(lat,lon){
+  let best=null,bd=Infinity;
+  const cl=Math.cos(lat*Math.PI/180);
+  for(const r of DATA.zips){
+    const la=r[14],lo=r[15]; if(la==null)continue;
+    const dy=la-lat, dx=(lo-lon)*cl, d=dy*dy+dx*dx;   // squared degrees, good enough to rank
+    if(d<bd){bd=d;best=r;}
+  }
+  return best?{zip:best[0],miles:Math.sqrt(bd)*69}:null;
+}
+
+/* ---- shareable state ---------------------------------------------- */
+const TRADE_ORDER=[...new Set([...SCOPE.gut,...SCOPE.standard,...SCOPE.cosmetic])].sort();
+
+function encodeState(){
+  const on=TRADE_ORDER.map(t=>trades[t]?"1":"0").join("");
+  const q=TRADE_ORDER.map(t=>DATA.mat[t]&&DATA.mat[t][1]
+      ? String(TIER_NAMES.indexOf(quality[t]||"standard")) : "").join("");
+  const p=new URLSearchParams({z:$("zip").value,f:$("sqft").value,b:$("beds").value,
+    a:$("baths").value,s:scope,t:on,q:q,d:$("dw").value,h:$("hold").value,
+    i:$("ins").value,u:$("util").value,y:$("yard").value,n:$("fin").value,
+    g:$("gc").value,c:$("cont").value,m:$("marg").value,k:$("mq").value,
+    o:JSON.stringify(Object.fromEntries(Object.entries(overrides).map(([k,v])=>
+      [TRADE_ORDER.indexOf(k),Math.round(v)]))),
+    om:JSON.stringify(Object.fromEntries(Object.entries(ovM).map(([k,v])=>
+      [TRADE_ORDER.indexOf(k),Math.round(v)]))),
+    ol:JSON.stringify(Object.fromEntries(Object.entries(ovL).map(([k,v])=>
+      [TRADE_ORDER.indexOf(k),Math.round(v)])))});
+  return location.origin+location.pathname+"#"+p.toString();
+}
+
+function applyState(){
+  if(!location.hash||location.hash.length<3) return false;
+  try{
+    const p=new URLSearchParams(location.hash.slice(1));
+    if(!p.get("z")||!zipInfo(p.get("z"))) return false;
+    $("zip").value=p.get("z");
+    [["f","sqft"],["b","beds"],["a","baths"],["d","dw"],["h","hold"],["i","ins"],
+     ["u","util"],["y","yard"],["n","fin"],["g","gc"],["c","cont"],["m","marg"],["k","mq"]]
+      .forEach(([k,id])=>{ if(p.get(k)!==null) $(id).value=p.get(k); });
+    scope=p.get("s")||"standard";
+    document.querySelectorAll("#scopeSeg button").forEach(b=>
+      b.setAttribute("aria-pressed",b.dataset.s===scope?"true":"false"));
+    const on=p.get("t")||"", qs=p.get("q")||"";
+    trades={}; quality={}; overrides={}; ovM={}; ovL={};
+    for(const [key,dst] of [["om",ovM],["ol",ovL]]){
+      try{ const o=JSON.parse(p.get(key)||"{}");
+        for(const k in o){ const nm=TRADE_ORDER[+k]; if(nm) dst[nm]=o[k]; } }catch(e){} }
+    try{ const ov=JSON.parse(p.get("o")||"{}");
+      for(const k in ov){ const nm=TRADE_ORDER[+k]; if(nm) overrides[nm]=ov[k]; } }catch(e){}
+    TRADE_ORDER.forEach((t,i)=>{
+      trades[t]= on[i]==="1";
+      if(qs[i]&&qs[i]!==" ") quality[t]=TIER_NAMES[+qs[i]]||"standard";
+    });
+    renderTrades(); calc();
+    return true;
+  }catch(e){ return false; }
+}
+
+function dealText(){
+  const z=zipInfo($("zip").value);
+  const r=window.__last||{};
+  const L=[];
+  L.push(`${$("sqft").value} sqft in ${z.city}, ${z.state} ${z.zip}`);
+  L.push("");
+  L.push(r.bad?"No offer works on this one.":`Don't pay more than ${money(r.offer)}`);
+  L.push(`Resale after repairs   ${money(r.arvLo)} - ${money(r.arvHi)}`);
+  L.push(`Repair budget          ${money(r.rehab)}`);
+  L.push(`  Materials            ${money(r.matTot)}`);
+  L.push(`  Labor                ${money(r.labTot)}`);
+  L.push(`  Running the job      ${money(r.gc)}`);
+  L.push(`  Contingency          ${money(r.cont)}`);
+  L.push(`Carrying ${String(r.holdDays).padStart(3)} days     ${money(r.holding)}`);
+  if(r.fin) L.push(`Loan costs             ${money(r.fin)}`);
+  L.push(`Selling costs          ${money(r.selling)}`);
+  L.push(`You keep               ${money(r.margin)}`);
+  L.push("");
+  if(r.gaugePct>0.40) L.push(`Heads up: job + carry is ${(r.gaugePct*100).toFixed(0)}% of resale, past the 40% mark.`);
+  return L.join("\n");
+}
+
+$("mq").addEventListener("input",e=>{
+  const tier=TIER_NAMES[+e.target.value];
+  $("mqLbl").textContent=TIER_LABEL[tier];
+  Object.keys(DATA.mat).forEach(t=>{ if(DATA.mat[t][1]) quality[t]=tier; });
+  renderTrades(); calc();
+});
+
+$("share").addEventListener("click",async()=>{
+  const url=encodeState(), text=dealText(), btn=$("share"), lbl=$("shareTxt");
+  const flash=t=>{lbl.textContent=t;btn.dataset.ok="1";
+    setTimeout(()=>{lbl.textContent="Send this deal";btn.dataset.ok="";},2200);};
+  if(navigator.share){
+    try{ await navigator.share({title:"Flip numbers",text:text+"\n\n"+url}); return; }
+    catch(e){ if(e.name==="AbortError") return; }
+  }
+  try{ await navigator.clipboard.writeText(text+"\n\n"+url); flash("Copied"); }
+  catch(e){ flash("Press and hold to copy"); }
+});
+
+$("locBtn").addEventListener("click",()=>{
+  const b=$("locBtn");
+  if(!navigator.geolocation){
+    $("mktStats").textContent="This browser can't share a location. Type a ZIP instead.";return;}
+  b.dataset.state="busy";
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const n=nearestZip(pos.coords.latitude,pos.coords.longitude);
+    if(!n){b.dataset.state="";return;}
+    b.dataset.state="on";
+    $("zip").value=n.zip; quality={}; renderTrades(); calc();
+    if(n.miles>25) $("mktStats").textContent=
+      `Nearest ZIP with data is ${Math.round(n.miles)} miles away. Type a closer one if you know it.`;
+  },err=>{
+    b.dataset.state="";
+    $("mktStats").textContent = err.code===1
+      ? "Location is turned off for this site. Type a ZIP instead."
+      : "Couldn't get a location. Type a ZIP instead.";
+  },{enableHighAccuracy:false,timeout:9000,maximumAge:600000});
+});
+
+$("zip").addEventListener("input",e=>{
+  e.target.value=e.target.value.replace(/\D/g,"").slice(0,5);
+  if(e.target.value.length===5){const z=zipInfo(e.target.value);
+    if(z){quality={};renderTrades();}}
+  calc();});
+["sqft","beds","baths","hold","ins","util","yard","fin","gc","cont","marg","dw"]
+  .forEach(id=>$(id).addEventListener("input",calc));
+document.querySelectorAll("#scopeSeg button").forEach(b=>b.onclick=()=>setScope(b.dataset.s));
+
+fetch("/data.json").then(r=>r.json()).then(d=>{
+  DATA=d; DATA.zips.forEach(r=>ZIDX.set(r[0],r));
+  if(!applyState()) setScope("standard");
+}).catch(()=>{ document.getElementById("mktName").textContent="Couldn't load market data";
+  document.getElementById("mktStats").textContent="Check your connection and reload."; });
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js")); }
+</script>
+</body>
+</html>
