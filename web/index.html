@@ -191,6 +191,19 @@ summary .val{font-family:'Archivo Narrow',sans-serif;font-weight:400;
   font-size:13.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .body{padding:2px 2px 20px}
 
+/* ---- sources ---- */
+.thiszip{font-family:'Archivo Narrow',sans-serif;font-size:13.5px;line-height:1.45;
+  background:var(--amber-soft);border-left:3px solid var(--amber);padding:9px 11px;
+  margin:0 0 12px;border-radius:0 3px 3px 0}
+.thiszip b{font-weight:700}
+.src{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:9px 0;
+  border-bottom:1px dotted var(--rule);font-family:'Archivo Narrow',sans-serif}
+.src:last-child{border-bottom:none}
+.src b{font-family:Archivo,sans-serif;font-size:14.5px;font-weight:700}
+.src span{grid-column:1;font-size:13px;color:var(--ink-2);line-height:1.35}
+.src em{grid-column:2;grid-row:1/3;align-self:center;font-style:normal;font-weight:700;
+  color:var(--amber);font-size:13.5px;white-space:nowrap}
+
 /* ---- controls ---- */
 .row{display:flex;align-items:center;gap:12px;padding:9px 0;
   border-bottom:1px dotted var(--rule)}
@@ -444,6 +457,21 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--amber);height:34px}
     <summary>Where the money goes <span class="val" id="sumLedger"></span></summary>
     <div class="body"><div class="ledger" id="ledger"></div>
       <div class="note" id="arvNote"></div></div>
+  </details>
+
+  <details id="srcPanel">
+    <summary>Where the numbers come from <span class="val" id="sumSrc"></span></summary>
+    <div class="body">
+      <div class="thiszip" id="thisZip"></div>
+      <div class="src" data-src="realtor"><b>Realtor.com</b><span>Asking price per sq ft, days on market, price cuts</span><em>40,846 ZIPs</em></div>
+      <div class="src" data-src="redfin"><b>Redfin</b><span>What homes actually sold for, and the sale-to-list ratio</span><em>14,397 ZIPs</em></div>
+      <div class="src" data-src="zillow"><b>Zillow Research</b><span>Home values, market heat, 12-month forecast</span><em>894 metros</em></div>
+      <div class="src" data-src="acs"><b>US Census · ACS</b><span>Effective property tax rate for every ZIP</span><em>2 tables</em></div>
+      <div class="src" data-src="tracts"><b>US Census tracts</b><span>Neighborhood-level home values and tax rates</span><em>81,580 tracts</em></div>
+      <div class="src" data-src="geocoder"><b>Census Geocoder</b><span>Turns a street address into its neighborhood</span><em>Free</em></div>
+      <div class="src" data-src="invoices"><b>Contractor invoices</b><span>Rehab costs, split into materials and labor</span><em>38 line items</em></div>
+      <div class="src" data-src="rentcast"><b>RentCast · Mapbox</b><span>Beds, baths, sq ft from records; address search</span><em>Optional</em></div>
+    </div>
   </details>
 
   <div class="foot" id="foot"></div>
@@ -789,7 +817,15 @@ function calc(){
   $("ledger").innerHTML=L.map(([k,v])=>
     `<div class="${v<0?'neg':''}"><span>${k}</span><span>${money(v)}</span></div>`).join("");
 
-  $("foot").textContent=`${DATA.zips.length.toLocaleString()} ZIP codes. Prices from Realtor.com and Zillow research data, property tax from the Census ACS, build costs from real contractor invoices. Nothing here is a substitute for walking the property.`;
+  const valTxt = valSrc==="sold" ? `<b>Redfin</b> sold prices (${z.nSold} recent sales)`
+    : valSrc==="list_real" ? `<b>Realtor.com</b> asking prices × <b>Redfin</b> sale-to-list`
+    : `<b>Realtor.com</b> asking prices, discount estimated`;
+  $("thisZip").innerHTML = `${z.zip} is using: resale from ${valTxt} · tax from `+
+    (tractAdj?`<b>Census tract</b> data`:`<b>Census ACS</b> (${(z.tax*100).toFixed(2)}%)`)+
+    ` · market speed from <b>Realtor.com</b> · build costs from <b>contractor invoices</b>`+
+    (z.src!=="zip"?` · price data falls back to <b>${z.src}</b> level here`:"")+`.`;
+  $("sumSrc").textContent="9 sources";
+  $("foot").textContent=`${DATA.zips.length.toLocaleString()} ZIP codes. Sold prices from Redfin, asking prices from Realtor.com, market data from Zillow research, property tax from the US Census, build costs from real contractor invoices. Nothing here is a substitute for walking the property.`;
 }
 
 let TRACTS=null, tractAdj=null, assessed=null, suggests=[], suggIdx=-1, suggTimer=null, suggSeq=0;
