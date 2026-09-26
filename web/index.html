@@ -191,6 +191,29 @@ summary .val{font-family:'Archivo Narrow',sans-serif;font-weight:400;
   font-size:13.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .body{padding:2px 2px 20px}
 
+.live{display:flex;justify-content:space-between;gap:10px;margin-top:8px;padding:7px 10px;
+  border-radius:3px;background:var(--field);border:1px solid var(--rule);
+  font-family:'Archivo Narrow',sans-serif;font-size:13px;color:var(--ink-2)}
+.live b{font-family:Archivo,sans-serif;font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
+.live .bad{color:var(--warn)}
+
+/* ---- walkthrough ---- */
+.wtop{padding:0 0 6px}
+.wg{font-family:Archivo,sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.04em;
+  color:var(--amber);padding:14px 0 2px}
+.wq{padding:9px 0 10px;border-bottom:1px dotted var(--rule)}
+.wl{font-family:'Archivo Narrow',sans-serif;font-size:14.5px;margin-bottom:7px}
+.whint{display:block;font-size:12.5px;color:var(--amber);margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:'Archivo Narrow',sans-serif;font-size:13.5px;padding:7px 11px;min-height:36px;
+  border:1px solid var(--rule);border-radius:18px;background:var(--field);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:600}
+.chip:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.wfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  font-family:'Archivo Narrow',sans-serif;font-size:13px;color:var(--ink-2);padding-top:12px}
+.wfoot button{font-family:'Archivo Narrow',sans-serif;font-size:13px;padding:6px 11px;
+  border:1px solid var(--rule);border-radius:3px;background:none;color:var(--ink-2);cursor:pointer}
+
 /* ---- sources ---- */
 .thiszip{font-family:'Archivo Narrow',sans-serif;font-size:13.5px;line-height:1.45;
   background:var(--amber-soft);border-left:3px solid var(--amber);padding:9px 11px;
@@ -324,6 +347,7 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--amber);height:34px}
       <ul id="sugg" role="listbox" hidden></ul>
     </div>
     <div class="addrNote" id="addrNote"></div>
+    <div class="live" id="live" hidden></div>
   </div>
 
   <div class="answer">
@@ -367,6 +391,17 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--amber);height:34px}
       <div class="row"><label for="arvIn">Sells for after repairs</label>
         <input type="number" id="arvIn" class="money-in" min="0" step="1000" inputmode="numeric"></div>
       <div class="note" id="houseNote"></div>
+    </div>
+  </details>
+
+  <details id="walkPanel">
+    <summary>Walk the property <span class="val" id="sumWalk"></span></summary>
+    <div class="body">
+      <div class="note wtop">Answer these as you walk through, in any order. Each answer adds or
+        removes the matching work below, and the numbers update as you go. Skip anything you
+        haven't looked at yet.</div>
+      <div id="walk"></div>
+      <div class="wfoot" id="walkFoot"></div>
     </div>
   </details>
 
@@ -507,8 +542,117 @@ const SCOPE={
   "Repipe supply lines","Full system replace (condenser + air handler)","Ductwork replacement",
   "Insulation (attic blown)","Panel upgrade 200A","Water heater","Windows",
   "Dumpster & debris haul","Permits"]};
+const EXTRA=["Foundation repair (pier & beam level)","Slab crack repair","Siding replacement",
+ "Fascia/soffit","Exterior doors","Decking replacement","Sewer line replacement","Mold remediation",
+ "Termite / pest treatment","Carpet","Flooring tile","AC repair / tune-up","Roof repair (as needed)"];
 const PER_SQFT=new Set(["Interior paint","Exterior paint","Flooring LVP","Carpet",
   "Full drywall replace","Insulation (attic blown)","Siding replacement"]);
+const ROOF="Tear-off & replace 3-tab/architectural", HVAC="Full system replace (condenser + air handler)";
+/* Each answer lists the trades it turns on and off. Unanswered questions change nothing,
+   so the Cosmetic / Standard / Gut preset still decides those trades. */
+const WALK=[
+ {g:"Outside"},
+ {k:"roof",q:"Roof",a:[["Under 10 years",{off:[ROOF,"Decking replacement","Roof repair (as needed)"]}],
+   ["10–20 years",{on:["Roof repair (as needed)"],off:[ROOF,"Decking replacement"]}],
+   ["Over 20, or leaking",{on:[ROOF,"Decking replacement"],off:["Roof repair (as needed)"]}]]},
+ {k:"ext",q:"Siding & exterior paint",a:[["Fine",{off:["Siding replacement","Exterior paint"]}],
+   ["Needs paint",{on:["Exterior paint"],off:["Siding replacement"]}],
+   ["Siding damaged",{on:["Siding replacement","Exterior paint"]}]]},
+ {k:"fascia",q:"Fascia & soffit",a:[["Solid",{off:["Fascia/soffit"]}],["Rotted",{on:["Fascia/soffit"]}]]},
+ {k:"win",q:"Windows",a:[["Double-pane, working",{off:["Windows"]}],["Single-pane or broken",{on:["Windows"]}]]},
+ {k:"edoor",q:"Exterior doors",a:[["Fine",{off:["Exterior doors"]}],["Replace",{on:["Exterior doors"]}]]},
+ {k:"fdn",q:"Foundation",a:[["Solid",{off:["Foundation repair (pier & beam level)","Slab crack repair"]}],
+   ["Sloping floors — pier & beam",{on:["Foundation repair (pier & beam level)"],off:["Slab crack repair"]}],
+   ["Cracks — slab",{on:["Slab crack repair"],off:["Foundation repair (pier & beam level)"]}]]},
+ {g:"Systems"},
+ {k:"hvac",q:"AC & heat",a:[["Works, newer",{off:[HVAC,"Ductwork replacement","AC repair / tune-up"]}],
+   ["Old — repair it",{on:["AC repair / tune-up"],off:[HVAC,"Ductwork replacement"]}],
+   ["Not working — replace",{on:[HVAC],off:["Ductwork replacement","AC repair / tune-up"]}],
+   ["Replace, ducts too",{on:[HVAC,"Ductwork replacement"],off:["AC repair / tune-up"]}]],hint:"hvac"},
+ {k:"elec",q:"Electrical",a:[["Modern panel & wiring",{off:["Panel upgrade 200A","Whole-house rewire"]}],
+   ["Old panel",{on:["Panel upgrade 200A"],off:["Whole-house rewire"]}],
+   ["Old wiring (knob & tube, aluminum)",{on:["Panel upgrade 200A","Whole-house rewire"]}]],hint:"old"},
+ {k:"pipe",q:"Supply pipes",a:[["PEX or copper",{off:["Repipe supply lines"]}],
+   ["Galvanized or polybutylene",{on:["Repipe supply lines"]}]],hint:"old"},
+ {k:"sewer",q:"Drains",a:[["Flow fine",{off:["Sewer line replacement"]}],
+   ["Slow or backing up",{on:["Sewer line replacement"]}]]},
+ {k:"wh",q:"Water heater",a:[["Under 10 years",{off:["Water heater"]}],["Older or dead",{on:["Water heater"]}]]},
+ {k:"ins",q:"Attic insulation",a:[["Good",{off:["Insulation (attic blown)"]}],["Thin or none",{on:["Insulation (attic blown)"]}]]},
+ {g:"Inside"},
+ {k:"walls",q:"Walls & ceilings",a:[["Good",{dw:0,off:["Full drywall replace"]}],
+   ["A few holes",{dw:1,off:["Full drywall replace"]}],["A room or two",{dw:3,off:["Full drywall replace"]}],
+   ["Several rooms",{dw:4,off:["Full drywall replace"]}],["Tear it all out",{on:["Full drywall replace"]}]]},
+ {k:"floor",q:"Floors",a:[["Keep",{off:["Flooring LVP","Carpet"]}],
+   ["LVP throughout",{on:["Flooring LVP"],off:["Carpet"]}],
+   ["LVP + carpet in bedrooms",{on:["Flooring LVP","Carpet"]}]]},
+ {k:"ipaint",q:"Interior paint",a:[["Fresh",{off:["Interior paint"]}],["Needs paint",{on:["Interior paint"]}]]},
+ {k:"idoor",q:"Interior doors & trim",a:[["Fine",{off:["Interior doors & trim"]}],["Beat up",{on:["Interior doors & trim"]}]]},
+ {k:"mold",q:"Water damage or mold smell",a:[["No",{off:["Mold remediation"]}],["Yes",{on:["Mold remediation"]}]]},
+ {k:"pest",q:"Termite signs",a:[["None",{off:["Termite / pest treatment"]}],["Yes",{on:["Termite / pest treatment"]}]]},
+ {k:"lights",q:"Lights & outlets",a:[["Fine",{off:["Fixtures & devices"]}],["Dated or broken",{on:["Fixtures & devices"]}]]},
+ {g:"Kitchen & baths"},
+ {k:"kit",q:"Kitchen",a:[["Keep",{off:["Cabinets (stock)","Countertops"]}],
+   ["New counters",{on:["Countertops"],off:["Cabinets (stock)"]}],
+   ["Cabinets & counters",{on:["Cabinets (stock)","Countertops"]}]]},
+ {k:"app",q:"Appliances",a:[["Keep",{off:["Appliance package"]}],["Replace",{on:["Appliance package"]}]]},
+ {k:"bath",q:"Bathrooms",a:[["Fine",{off:["Refresh (vanity/toilet/tile/fixtures)","Full bath gut & rebuild","Flooring tile"]}],
+   ["Refresh",{on:["Refresh (vanity/toilet/tile/fixtures)"],off:["Full bath gut & rebuild"]}],
+   ["Full rebuild",{on:["Full bath gut & rebuild"],off:["Refresh (vanity/toilet/tile/fixtures)"]}]]},
+];
+const WQ=WALK.filter(x=>x.k);
+let walk={}, propYear=null;
+
+function applyWalk(){
+  for(const q of WQ){
+    const i=walk[q.k]; if(i==null) continue;
+    const eff=q.a[i][1];
+    (eff.off||[]).forEach(t=>trades[t]=false);
+    (eff.on||[]).forEach(t=>trades[t]=true);
+    if(eff.dw!=null) $("dw").value=eff.dw;
+  }
+}
+
+/* Put the trades one question controls back to what the preset says. Used when an
+   answer is cleared or changed; trades other questions control are left alone. */
+function resetQ(q){
+  const pre=new Set(SCOPE[scope]), ts=new Set(); let dw=false;
+  q.a.forEach(([,e])=>{ (e.on||[]).forEach(t=>ts.add(t)); (e.off||[]).forEach(t=>ts.add(t)); if(e.dw!=null) dw=true; });
+  ts.forEach(t=>trades[t]=pre.has(t));
+  if(dw) $("dw").value = scope==="cosmetic"?1 : scope==="standard"?3 : 5;
+}
+
+function renderWalk(){
+  const el=$("walk"); el.innerHTML="";
+  const old = propYear && propYear<1975;
+  for(const q of WALK){
+    if(q.g){ const g=document.createElement("div"); g.className="wg"; g.textContent=q.g; el.appendChild(g); continue; }
+    const row=document.createElement("div"); row.className="wq";
+    let hint="";
+    if(q.hint==="old" && old) hint=`Built ${propYear} — worth checking closely.`;
+    if(q.hint==="hvac" && propYear && propYear<1995) hint=`Built ${propYear} — if it's the original system, it's past its life.`;
+    row.innerHTML=`<div class="wl">${q.q}${hint?`<span class="whint">${hint}</span>`:""}</div><div class="chips"></div>`;
+    const box=row.querySelector(".chips");
+    q.a.forEach(([label],i)=>{
+      const b=document.createElement("button");
+      b.className="chip"; b.textContent=label;
+      b.setAttribute("aria-pressed", walk[q.k]===i?"true":"false");
+      b.onclick=()=>{
+        const was=walk[q.k];
+        if(was!=null) resetQ(q);
+        if(was===i) delete walk[q.k]; else walk[q.k]=i;
+        applyWalk(); renderTrades(); calc(); renderWalk(); };
+      box.appendChild(b);
+    });
+    el.appendChild(row);
+  }
+  const n=Object.keys(walk).length;
+  $("sumWalk").textContent = n ? `${n} of ${WQ.length} answered` : "sets the work for you";
+  $("walkFoot").innerHTML = n
+    ? `<span>Your answers are setting the work below.</span><button id="walkClear">Clear answers</button>`
+    : `<span>Nothing answered yet — the ${scope} preset is deciding the work.</span>`;
+  if(n) $("walkClear").onclick=()=>{ walk={}; setScope(scope); renderWalk(); };
+}
+
 const TIER_NAMES=["builder","standard","mid","high","luxury"];
 const TIER_LABEL={builder:"Builder grade",standard:"Standard",mid:"Upgraded",
   high:"High end",luxury:"Luxury"};
@@ -526,7 +670,13 @@ const SHORT={"Tear-off & replace 3-tab/architectural":"Roof — tear off & repla
  "Insulation (attic blown)":"Attic insulation","Ductwork replacement":"Ductwork",
  "Appliance package":"Appliances","Water heater":"Water heater","Windows":"Windows",
  "Countertops":"Countertops","Interior paint":"Interior paint","Exterior paint":"Exterior paint",
- "Permits":"Permits"};
+ "Permits":"Permits",
+ "Foundation repair (pier & beam level)":"Foundation — level pier & beam",
+ "Slab crack repair":"Foundation — slab crack repair","Siding replacement":"Siding",
+ "Fascia/soffit":"Fascia & soffit","Exterior doors":"Exterior doors","Decking replacement":"Roof decking",
+ "Sewer line replacement":"Sewer line","Mold remediation":"Mold remediation",
+ "Termite / pest treatment":"Termite treatment","Carpet":"Carpet — bedrooms","Flooring tile":"Tile",
+ "AC repair / tune-up":"AC — repair & get running","Roof repair (as needed)":"Roof — repairs as needed"};
 
 const ZIDX=new Map();
 function zipInfo(z){const r=ZIDX.get(z); if(!r) return null;
@@ -541,6 +691,7 @@ let scope="standard", trades={}, quality={}, overrides={}, lastParts={}, ovM={},
 function defaultTier(psf){return psf>=600?"luxury":psf>=400?"high":psf>=250?"mid":psf>=120?"standard":"builder";}
 
 function qty(item,sqft,beds,baths){
+  if(item==="Flooring LVP" && trades["Carpet"]) return Math.max(Math.round(sqft*0.4), sqft-beds*150);
   if(PER_SQFT.has(item))return sqft;
   if(item==="Tear-off & replace 3-tab/architectural")return sqft*1.2;
   if(item==="Interior doors & trim")return beds+baths+3;
@@ -549,6 +700,16 @@ function qty(item,sqft,beds,baths){
   if(item==="Cabinets (stock)")return sqft<1500?14:20;
   if(item==="Countertops")return sqft<1500?35:50;
   if(item==="Dumpster & debris haul")return sqft<1200?1:2;
+  if(item==="Siding replacement")return Math.round(sqft*0.55);
+  if(item==="Fascia/soffit")return Math.round(sqft/12.5);
+  if(item==="Exterior doors")return 2;
+  if(item==="Foundation repair (pier & beam level)")return Math.min(24,Math.max(6,Math.round(sqft/125)));
+  if(item==="Slab crack repair")return 20;
+  if(item==="Sewer line replacement")return 40;
+  if(item==="Mold remediation")return 200;
+  if(item==="Carpet")return beds*150;
+  if(item==="Flooring tile")return 60+baths*60;
+  if(item==="Decking replacement")return Math.max(4,Math.round(sqft*1.2/32*0.15));
   return 1;}
 
 function lineSplit(item,q,idx,tier){
@@ -579,11 +740,13 @@ function setScope(s){
     b.setAttribute("aria-pressed",b.dataset.s===s?"true":"false"));
   SCOPE[s].forEach(t=>trades[t]=true);
   $("dw").value = s==="cosmetic"?1 : s==="standard"?3 : 5;
-  renderTrades(); calc();}
+  applyWalk();
+  renderTrades(); calc();
+  if(typeof renderWalk==="function" && $("walk")) renderWalk();}
 
 function renderTrades(){
   const z=zipInfo($("zip").value); if(!z)return;
-  const all=[...new Set([...SCOPE.gut,...SCOPE.standard,...SCOPE.cosmetic])];
+  const all=[...new Set([...SCOPE.gut,...SCOPE.standard,...SCOPE.cosmetic,...EXTRA])];
   const el=$("trades"); el.innerHTML="";
   setTimeout(syncMaster,0);
   all.forEach(t=>{
@@ -775,6 +938,8 @@ function calc(){
       ? `Sells for <em>${money(arv)}</em> (your number) · you keep <em>${money(margin)}</em>`
       : `Sells for <em>${money(arvLo)}–${money(arvHi)}</em> after repairs · you keep <em>${money(margin)}</em>`;
 
+  $("live").innerHTML=`<span>Offer <b class="${bad?"bad":""}">${bad?"no deal":money(offer)}</b></span>`+
+    `<span>Repairs <b>${money(rehab)}</b></span><span>Keep <b>${money(margin)}</b></span>`;
   const pct=Math.min(gaugePct/0.55,1)*100;
   $("gfill").style.width=pct+"%";
   $("gfill").className="gfill"+(gaugePct>0.40?" over":"");
@@ -954,7 +1119,7 @@ function fillFromProperty(fullAddress,lat,lon){
       if(p.sqft){ $("sqft").value=Math.round(p.sqft); got.push(Math.round(p.sqft).toLocaleString()+" sqft"); }
       if(p.beds){ $("beds").value=Math.round(p.beds); got.push(Math.round(p.beds)+" bd"); }
       if(p.baths){ $("baths").value=Math.max(1,Math.round(p.baths)); got.push(p.baths+" ba"); }
-      if(p.yearBuilt) got.push("built "+p.yearBuilt);
+      if(p.yearBuilt){ got.push("built "+p.yearBuilt); propYear=p.yearBuilt; renderWalk(); }
       if(p.assessedValue) assessed=p.assessedValue;
       const via = p.matchedBy==="nearby" ? " (nearest parcel on record)" : "";
       propNote = got.length
@@ -1041,7 +1206,7 @@ function nearestZip(lat,lon){
 }
 
 /* ---- shareable state ---------------------------------------------- */
-const TRADE_ORDER=[...new Set([...SCOPE.gut,...SCOPE.standard,...SCOPE.cosmetic])].sort();
+const TRADE_ORDER=[...new Set([...SCOPE.gut,...SCOPE.standard,...SCOPE.cosmetic])].sort().concat(EXTRA);
 
 function encodeState(){
   const on=TRADE_ORDER.map(t=>trades[t]?"1":"0").join("");
@@ -1051,6 +1216,7 @@ function encodeState(){
     a:$("baths").value,s:scope,t:on,q:q,d:$("dw").value,h:$("hold").value,
     i:$("ins").value,u:$("util").value,y:$("yard").value,n:$("fin").value,
     g:$("gc").value,c:$("cont").value,m:$("marg").value,k:$("mq").value,
+    w:WQ.map(q=>walk[q.k]==null?"-":String(walk[q.k])).join(""),
     v:$("arvIn").value,tx:$("taxIn").value,sp:$("sellPct").value,bp:$("buyPct").value,lt:$("ltc").value,
     o:JSON.stringify(Object.fromEntries(Object.entries(overrides).map(([k,v])=>
       [TRADE_ORDER.indexOf(k),Math.round(v)]))),
@@ -1085,7 +1251,9 @@ function applyState(){
       trades[t]= on[i]==="1";
       if(qs[i]&&qs[i]!==" ") quality[t]=TIER_NAMES[+qs[i]]||"standard";
     });
-    renderTrades(); calc();
+    walk={}; const ws=p.get("w")||"";
+    WQ.forEach((q,i)=>{ const c=ws[i]; if(c&&c!=="-"&&q.a[+c]) walk[q.k]=+c; });
+    applyWalk(); renderTrades(); calc(); renderWalk();
     return true;
   }catch(e){ return false; }
 }
@@ -1111,6 +1279,11 @@ function dealText(){
   L.push("");
   if(r.gaugePct>0.40) L.push(`Heads up: job + carry is ${(r.gaugePct*100).toFixed(0)}% of resale, past the 40% mark.`);
   return L.join("\n");
+}
+
+if("IntersectionObserver" in window){
+  new IntersectionObserver(([e])=>{ $("live").hidden=e.isIntersecting; },
+    {rootMargin:"-170px 0px 0px 0px"}).observe($("mao"));
 }
 
 $("maoSub").addEventListener("click",()=>{

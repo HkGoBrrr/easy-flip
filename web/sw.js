@@ -2,7 +2,7 @@
  * Page: network-first, so a redeploy shows up on the next launch.
  * Data and assets: cache-first, so the app works with no signal once loaded.
  */
-const CACHE = "offer-v18";
+const CACHE = "offer-v20";
 const ASSETS = ["/", "/index.html", "/data.json", "/tracts.txt",
   "/manifest.webmanifest", "/favicon.ico", "/og.png",
   "/icons/icon-192.png", "/icons/icon-512.png", "/icons/apple-touch-icon.png"];
